@@ -27,10 +27,13 @@ typedef struct ComponentDataTag{
     LPCTSTR PinNames[MAX_PIN_COUNT];                                                 //Valid Number of images from below property
 }ComponentData;
 
-extern  ComponentData   rgCompData[TOTAL_COMPONENTS];
-
 void RefreshImages();
 void SetImage(int Component, void *il);
+
+static ComponentData rgCompData[TOTAL_COMPONENTS] = {
+    {0, COMPONENT_SWITCH, TEXT("Switch"), 2, {"Input:", "Output:"}},
+    {1, COMPONENT_RELAY, TEXT("Relay"), 5, {"Coil1:", "Coil2:", "NO:", "COM:", "NC:"}}
+};
 
 #endif
 #endif

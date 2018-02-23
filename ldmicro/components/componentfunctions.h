@@ -30,7 +30,7 @@ void HandleSwitchEvent(void* ComponentAddress, int Event, BOOL SimulationStarted
 void HandleRelayEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
     void* ImageLocation, UINT ImageId, HWND* h);
 
-/*Voltage Change Handlers*/
+/*Request Handlers*/
 double SwitchVoltChanged(void* ComponentAddress, BOOL SimulationStarted, int index,
     double Volt, int Source, void* ImageLocation);
 double RelayVoltChanged(void* ComponentAddress, BOOL SimulationStarted, int index,

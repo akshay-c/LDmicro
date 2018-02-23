@@ -1,4 +1,5 @@
-
+LDMicro
+======
 LDmicro is a ladder logic editor, simulator and compiler for 8-bit
 microcontrollers. It can generate native code for Atmel AVR and Microchip
 PIC16 CPUs from a ladder diagram.

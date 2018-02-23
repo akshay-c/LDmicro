@@ -27,11 +27,6 @@ static HWND  Textboxes[MAX_PIN_COUNT];
 static HWND  Labels[MAX_PIN_COUNT];
 int *PinIds;
 
-ComponentData rgCompData[TOTAL_COMPONENTS] = {
-    {0, COMPONENT_SWITCH, TEXT("Switch"), 2, {"Input:", "Output:"}},
-    {1, COMPONENT_RELAY, TEXT("Relay"), 5, {"Coil1:", "Coil2:", "NO:", "COM:", "NC:"}}
-};
-
 void ShowNameDialog(int Index, void* PinName, void* ImageId);
 void MakeControls(int Index, int Pins);
 
@@ -90,12 +85,8 @@ double VoltSet(void* ComponentAddress, BOOL SimulationStarted, int ImageType, in
     return Volt;
 }
 
-/*Step: Handle events to images displayed on the Dialog*/
-
-int NotifyComponent(void *ComponentAddress, void *PinName, int ComponentId,
-    int Event, BOOL SimulationStarted, HWND* h, int Index, UINT ImageId, void* ImageLocation)
+void  	SetPinIds(int Index, void *PinName,int ComponentId, void *ComponentAddress, int Event)
 {
-    MainWindowHandle = h;
     if(Event == EVENT_MOUSE_RCLICK && !SimulationStarted)
     {
         ShowNameDialog(Index, PinName, ComponentAddress);
@@ -107,7 +98,16 @@ int NotifyComponent(void *ComponentAddress, void *PinName, int ComponentId,
             case COMPONENT_RELAY:
                 SetRelayIds(PinIds,ComponentAddress);
         }
-    }    
+    }
+}
+
+/*Step: Handle events to images displayed on the Dialog*/
+
+int NotifyComponent(void *ComponentAddress, void *PinName, int ComponentId,
+    int Event, BOOL SimulationStarted, HWND* h, int Index, UINT ImageId, void* ImageLocation)
+{
+    MainWindowHandle = h;
+    SetPinIds(Index, PinName, ComponentId, ComponentAddress, Event);
     /*char Debug[256];
     sprintf_s(Debug, "Notify Component Address: %p\n",ComponentAddress);
     OutputDebugString(Debug);*/
