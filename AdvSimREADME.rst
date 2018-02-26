@@ -1,5 +1,3 @@
-To understand what LDMicro is and its functioning, kindly read Readme.rst_ alongside.
-
 
 Advanced Simulation Mode for LDMicro
 ======
