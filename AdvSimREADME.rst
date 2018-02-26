@@ -9,16 +9,17 @@ Advanced Simulation Mode for LDMicro
 Summary
 ######
 
- The ``Advanced Simulation Window`` comprises of 4 sections namely:
-  1. Menu Bar: At the top
-  2. Component List: Right pane
-  3. Workspace Area: Central black area
-  4. IO List: Bottom pane
+The ``Advanced Simulation Window`` comprises of 4 sections namely:
+
+1. Menu Bar: At the top
+2. Component List: Right pane
+3. Workspace Area: Central black area
+4. IO List: Bottom pane
 
 Menu Bar
 ^^^^^^
 
- Most of the menu items in this dialog are similar to that of ``Main LDMicro Window``.
+Most of the menu items in this dialog are similar to that of ``Main LDMicro Window``.
 
 Component List
 ^^^^^^
@@ -36,12 +37,14 @@ IO List
  This list will replicate the IO list of the main window along with a few components of its own. After assigning pin names to a component, the name is added to this list along with the value representing voltage level of the same.
 
 Voltage Conventions
-******
+****
 
- Since we have standard voltage conventions if you wish to use them instead of direct values so as to make it easier for you to denote the values. A list of conventions is as follows:
-  1. V_OPEN: This denotes that the component pin is not connected to any IO from the micro-controller or to any voltage line directly.
-  2. GND: This states that the component pin is connected to GND terminal.
-  3. VOLT_5: This states that the component pin is connected to 5v Supply.
+Since we have standard voltage conventions if you wish to use them instead of direct values so as to make it easier for you to denote the values. A list of conventions is as follows:
+
+1. V_OPEN: This denotes that the component pin is not connected to any IO from the micro-controller or to any voltage line directly.
+2. GND: This states that the component pin is connected to GND terminal.
+3. VOLT_5: This states that the component pin is connected to 5v Supply.
+
 
 Developer's Guide
 ======
@@ -51,9 +54,9 @@ How to add components to Advanced Simulation Window?
 ######
 
 Add Images for Simulation
-------
+^^^^
 
-   Create .png images with blank background and red ink and place them in ``ldmicro/Img`` folder. Example images can be found at the same location. More than one image can be stored for a single component depending on different states of your component.
+Create .png images with blank background and red ink and place them in ``ldmicro/Img`` folder. Example images can be found at the same location. More than one image can be stored for a single component depending on different states of your component.
 
 ``componentimages.h`` file
 ^^^^^^
@@ -77,7 +80,7 @@ eg.
 An entry to the list of components on Advanced Window Dialog is required in order for the end user to select the component you are about to create. The next topic will give a detailed description to do so.
 
 Add Entry to the ComponentList
-------
+^^^^
 
 ``componentimages.h`` file
 ^^^^^^
@@ -115,7 +118,7 @@ eg. {<Index>, ``COMPONENT_SWITCH``, <TEXT>, <PINCOUNT(n)>,{<PINName1>, <PinName2
 * **PinNames**: This is an array of names for the IO pins which will be displayed in the dialogbox after right clicking the component image. Since we have specified ``{"Input:", "Output:"}`` as PinNames for switch; if you rightclick a switch image in non-simulation mode, you will be presented with a dialog asking for variables to be used to denote pin.
 
 Create structure for your component
-------
+^^^^
 
 * Now that we have an entry of our component in the dialog, we need to create a structure which we will use to store data for our switch. Create a structure in below mentioned file to maintain code readability
 
@@ -131,7 +134,7 @@ Create structure for your component
    return sizeof(SwitchStruct);  //Structure created in componentstructs above.
 
 Create functions for your components
-------
+^^^^
 
 Different types of functions are expected for every components. This section will deal with creation, storage and functionality of different functions to be added to the project.
 
