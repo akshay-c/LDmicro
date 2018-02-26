@@ -1,4 +1,5 @@
 To understand what LDMicro is and its functioning, kindly read Readme.rst_ alongside.
+.. _Readme.rst https://github.com/akshay-c/LDmicro/blob/master/README.rst
 
 Advanced Simulation Mode for LDMicro
 ======
