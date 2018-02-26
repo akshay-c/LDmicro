@@ -6,9 +6,10 @@ Advanced Simulation Mode for LDMicro
 
  LDMicro is already equipped with a basic ``Simulation Mode`` under ``Simulation`` menu. The present simulation is very basic making it difficult to understand working of complicated ladder programs/setups. In order to make it easier for the user to visualize end components and their working on a hardware, advanced simulation dialog has been introduced to LDMicro.
 
-#####
+######
 Summary
-#####
+######
+
  The ``Advanced Simulation Window`` comprises of 4 sections namely:
   1. Menu Bar: At the top
   2. Component List: Right pane
@@ -16,48 +17,56 @@ Summary
   4. IO List: Bottom pane
 
 Menu Bar
-^^^^^
+^^^^^^
+
  Most of the menu items in this dialog are similar to that of ``Main LDMicro Window``.
 
 Component List
-^^^^^^^^^^^
+^^^^^^
+
  This comprises of list of items that are available for simulation eg. Switch, Relay etc. You may double click any item of your choice in order to draw it on ``Workspace Area`` described below.
 
 Workspace Area
-^^^^^^^^^
+^^^^^^
+
  The main black area in front of you on which components are drawn automatically is called the workspace area. As soon as you double click on name of component that you wish to work with, that component will be added at a predefined location in the workspace area. Once your component is drawn on workspace area, you may drag and place it at any location of your convenience within the area. The window is not advanced enough to handle drawn connections; so in order to establish a connection between pins of a component, right click on the image displayed for the component, and a pin naming dialog will be displayed for the same. Name the pins accordingly; Components with similar pin names will be virtually considered connected.
 
 IO List
-^^^^^^^
+^^^^^^
+
  This list will replicate the IO list of the main window along with a few components of its own. After assigning pin names to a component, the name is added to this list along with the value representing voltage level of the same.
 
 Voltage Conventions
-**********
+******
+
  Since we have standard voltage conventions if you wish to use them instead of direct values so as to make it easier for you to denote the values. A list of conventions is as follows:
   1. V_OPEN: This denotes that the component pin is not connected to any IO from the micro-controller or to any voltage line directly.
   2. GND: This states that the component pin is connected to GND terminal.
   3. VOLT_5: This states that the component pin is connected to 5v Supply.
 
 Developer's Guide
-==========
+======
 
-#####
+######
 How to add components to Advanced Simulation Window?
-#####
+######
 
 Add Images for Simulation
 ------
+
    Create .png images with blank background and red ink and place them in ``ldmicro/Img`` folder. Example images can be found at the same location. More than one image can be stored for a single component depending on different states of your component.
 
 ``componentimages.h`` file
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^
+
 After you have copied your images into the appropriate folder/s, open ``components/componentimages.h`` and add a #define directive and assign a unique number in reference for your image according to the list specified.
 
 eg.
 ``#define     SWITCH_DISCONNECTED     8001``
 
 ``ldmicro.rc`` file
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^
+
 Next, we need to locate the image that is referred in ``componentimages.h`` file. Using the directive we just defined, set a location to the image in resources file ``ldmicro.rc``. Syntax for the same is as under
 
 <#define Directive>   <Image Extension>  "<ImageLocation>"
@@ -70,15 +79,18 @@ An entry to the list of components on Advanced Window Dialog is required in orde
 
 Add Entry to the ComponentList
 ------
+
 ``componentimages.h`` file
-^^^^^^^^^^
+^^^^^^
+
 We have already modified this file to create a #define directive to register images that are to be drawn for the new component. Now we will add a #define directive for the component for which these images will be created.
 
 eg. ``#define COMPONENT_SWITCH 6000``
 
 
 Structure ``rgCompData``:
-****
+******
+
 Add an entry to ``rgCompData`` struct. Make sure that every entry is separated by a new line, so as to make it easier for the other programmers to modify the list.
 
 Elements of the structure are as follows:
@@ -105,6 +117,7 @@ eg. {<Index>, ``COMPONENT_SWITCH``, <TEXT>, <PINCOUNT(n)>,{<PINName1>, <PinName2
 
 Create structure for your component
 ------
+
 * Now that we have an entry of our component in the dialog, we need to create a structure which we will use to store data for our switch. Create a structure in below mentioned file to maintain code readability
 
      ``components\componentstructs.h``
@@ -119,7 +132,8 @@ Create structure for your component
    return sizeof(SwitchStruct);  //Structure created in componentstructs above.
 
 Create functions for your components
---------
+------
+
 Different types of functions are expected for every components. This section will deal with creation, storage and functionality of different functions to be added to the project.
 
 Kindly add a declaration of these functions in ``componentfunctions.h`` file at appropriate locations so as it is easier to spot for modifications if required later.
@@ -162,11 +176,13 @@ function. If you are storing previous values in your custom structure, that may 
  From now on it will start getting tricky, as the values at the pin may or may not be static values. Before moving forward let us look at scenario's in which static/dynamic values are addressed.
 
 Static Values
-^^^^^^^^^^^^
+^^^^^^
+
  Consider a situation where switch is directly connected to a static voltage source such as ``GND`` signal at one end and micro-controller at other end. In this scenario, whenever the switch is pressed, micro-controller pin should be forced low. This is a static situation since signal ``GND`` is directly connected to the switch. The signal at this end will not change.
 
 Dynamic Values
-^^^^^^^^^^
+^^^^^^
+
 The situation described below is the only one of the few conditions that may arise in designing a pilot circuit.
 
  Suppose we have two switches connected in series between ``GND`` signal and micro-controller. We will name the connections ``GND = 'Connection at GND end'``, ``MCU = 'Connection at Micro-controller end'`` and ``CONN = 'Connection Between both switches'``.
@@ -180,7 +196,8 @@ If you design a component, it is not possible to store state of every other comp
    The ``VoltRequest()`` function discussed comes to your rescue. It is supposed to present you with a proper, updated value of your pin at runtime.
 
 Role of Incoming Request Handlers
-^^^^^^^
+^^^^^^
+
  These functions are automatically called by the main program when other components with matching PinId request voltage from your component. Incoming request handlers are to be defined in your component's ``.cpp`` file. Appropriate declaration is to be provided at ``Request Handlers`` section of your ``componentfunctions.h`` file. Next create a case for your component in switch construct of
 
    ``VoltSet(void* ComponentAddress, BOOL SimulationStarted, int ImageType, int Index, double Volt, int Source, void* ImageLocation)``
