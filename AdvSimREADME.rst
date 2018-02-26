@@ -1,5 +1,5 @@
 To understand what LDMicro is and its functioning, kindly read Readme.rst_ alongside.
-.. _Readme.rst: https://github.com/akshay-c/LDmicro/blob/master/README.rst
+
 
 Advanced Simulation Mode for LDMicro
 ======
@@ -219,3 +219,4 @@ Event handlers are to be defined in your component's ``.cpp`` file. Appropriate 
   * EVENT_MOUSE_DBLCLICK
   * EVENT_MOUSE_RCLICK``
  
+.. _Readme.rst: ldmicro/README.txt
