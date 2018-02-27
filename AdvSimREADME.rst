@@ -209,8 +209,8 @@ Role of Incoming Request Handlers
  * Index: Zero based index of pin mentioned in rgCompData structure.
  * Volt: Current Voltage value of Pin at index specified above.
  * Source: This is for future use, It mentions source from which this function was called you may ignore this argument for now.
- * ImageLocation: This argument is pointer, pointing to the location of current image being displayed on screen for the component. You may change this value to desired image using ``SetImage(int ImageId, void* ImageLocation)`` function in ``switch.cpp``.
-     ImageId: Pass macro of the image that you want to display eg. ``SWITCH_DISCONNECTED`` to display different image for your component at any time.
+ * ImageLocation: This argument is pointer, pointing to the location of current image being displayed on screen for the component. You may change this value to desired image using ``SetImage(int ImageId, void* ImageLocation)`` function.
+  * ImageId: Pass macro of the image that you want to display eg. ``SWITCH_DISCONNECTED`` or ``SWITCH_CONNECTED`` *(in case of a switch)* to display different image for your component at any time during runtime of your code.
 
  eg. Refer to ``SwitchVoltChanged()`` function in ``switch.cpp`` file.
 
