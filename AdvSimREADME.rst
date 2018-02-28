@@ -212,26 +212,26 @@ Create functions for your components
 
    eg. Refer to ``SwitchVoltChanged()`` function in ``switch.cpp`` file.
 
-6. **Event Handlers**: eg. HandleSwitchEvent()
+ 6. **Event Handlers**: eg. HandleSwitchEvent()
 
- These functions are called when mouse events occur on the image representing your component. You may request value change, image change in this function depending on requirements.  ``eg. Whenever a switch is pressed,HandleSwitchEvent() function toggles the image displayed for the switch between SWITCH_CONNECTED and SWITCH_DISCONNECTED  and checks the voltage on both ends to request voltage change for a pin with higher potential``
+  These functions are called when mouse events occur on the image representing your component. You may request value change, image change in this function depending on requirements.  ``eg. Whenever a switch is pressed,HandleSwitchEvent() function toggles the image displayed for the switch between SWITCH_CONNECTED and SWITCH_DISCONNECTED  and checks the voltage on both ends to request voltage change for a pin with higher potential``
 
- Event handlers are to be defined in your component's ``.cpp`` file. Appropriate declaration is to be provided at ``Event Handlers`` section of your ``componentfunctions.h`` file. Next create a case for your component in switch construct of
+  Event handlers are to be defined in your component's ``.cpp`` file. Appropriate declaration is to be provided at ``Event Handlers`` section of your ``componentfunctions.h`` file. Next create a case for your component in switch construct of
 
-  ``NotifyComponent(void* ComponentAddress, void *PinName, int ComponentId, int Event, BOOL SimulationStarted, HWND*h, int Index, UINT ImageId, void *ImageLocation)``
+   ``NotifyComponent(void* ComponentAddress, void *PinName, int ComponentId, int Event, BOOL SimulationStarted, HWND*h, int Index, UINT ImageId, void *ImageLocation)``
 
- function of ``components.cpp`` file.
+  function of ``components.cpp`` file.
 
- * ComponentAddress: This is the pointer to the Structure, that we have created for the component.
- * SimulationStarted: This is boolean type pointer to indicate if the Real Time Simulation is started or not.
- * Event: Event that has occurred for your component, in case you need to handle more than one event at runtime, this function can be used to call different functions as and when required. Possible event values are
+  * ComponentAddress: This is the pointer to the Structure, that we have created for the component.
+  * SimulationStarted: This is boolean type pointer to indicate if the Real Time Simulation is started or not.
+  * Event: Event that has occurred for your component, in case you need to handle more than one event at runtime, this function can be used to call different functions as and when required. Possible event values are
  
-  * EVENT_MOUSE_CLICK
-  * EVENT_MOUSE_DOWN
-  * EVENT_MOUSE_UP
-  * EVENT_MOUSE_RDOWN
-  * EVENT_MOUSE_RUP
-  * EVENT_MOUSE_DBLCLICK
-  * EVENT_MOUSE_RCLICK``
+   * EVENT_MOUSE_CLICK
+   * EVENT_MOUSE_DOWN
+   * EVENT_MOUSE_UP
+   * EVENT_MOUSE_RDOWN
+   * EVENT_MOUSE_RUP
+   * EVENT_MOUSE_DBLCLICK
+   * EVENT_MOUSE_RCLICK``
  
 .. _Readme.txt: ldmicro/README.txt
