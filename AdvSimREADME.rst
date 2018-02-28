@@ -33,7 +33,7 @@ Workspace Area
 IO List
 ~~~~~~~~~
 
- This list will replicate the IO list of the main window along with a few components of its own. After assigning pin names to a component, the name is added to this list along with the value representing voltage level of the same.
+ This list will replicate the IO list of the main window along with a few components of its own. After assigning pin names to a component, the name is added to this list along with the value representing voltage level of the same. Double click on Pin Name to change the voltage to a desired value. You may directly specify an integer value or use special voltage conventions as described below. For Microcontroller pins, value cannot be changed, but it may be toggled between ``Internal pull-up`` and ``V_OPEN`` by double-clicking on it.
 
 Voltage Conventions
 ******
@@ -174,45 +174,44 @@ Create functions for your components
 
   From now on it will start getting tricky, as the values at the pin may or may not be static values. Before moving forward let us look at scenario's in which static/dynamic values are addressed.
 
-Static Values
-******
+  * **Static Values**
 
- Consider a situation where switch is directly connected to a static voltage source such as ``GND`` signal at one end and micro-controller at other end. In this scenario, whenever the switch is pressed, micro-controller pin should be forced low. This is a static situation since signal ``GND`` is directly connected to the switch. The signal at this end will not change.
 
-Dynamic Values
-******
+   Consider a situation where switch is directly connected to a static voltage source such as ``GND`` signal at one end and micro-controller at other end. In this scenario, whenever the switch is pressed, micro-controller pin should be forced low. This is a static situation since signal ``GND`` is directly connected to the switch. The signal at this end will not change.
 
- The situation described below is the only one of the few conditions that may arise in designing a pilot circuit.
+  * **Dynamic Values**
 
-  Suppose we have two switches connected in series between ``GND`` signal and micro-controller. We will name the connections ``GND = 'Connection at GND end'``, ``MCU = 'Connection at Micro-controller end'`` and ``CONN = 'Connection Between both switches'``.
+    The situation described below is the only one of the few conditions that may arise in designing a pilot circuit.
 
-  Now, when switch connected to MCU is pressed, leaving GND switch open, CONN must read 5V because of internal pull up resistors on Micro-controller.
+     Suppose we have two switches connected in series between ``GND`` signal and micro-controller. We will name the connections ``GND = 'Connection at GND end'``, ``MCU = 'Connection at Micro-controller end'`` and ``CONN = 'Connection Between both switches'``.
 
-  If the switch connected to the 'GND' terminal is pressed, ``CONN`` must read ``GND voltage`` irrespective of the condition of ``MCU switch``; at the same time if the ``MCU switch`` is pressed, the ``GND`` signal should be further passed to the ``MCU Pin``.
+     Now, when switch connected to MCU is pressed, leaving GND switch open, CONN must read 5V because of internal pull up resistors on Micro-controller.
 
- If you design a component, it is not possible to store state of every other components as they may not have been thought of at the point of creation of your component and number of resources required will be directly proportional to the number of components in the design. The next couple of functions come into picture to address this particular issue.
+     If the switch connected to the 'GND' terminal is pressed, ``CONN`` must read ``GND voltage`` irrespective of the condition of ``MCU switch``; at the same time if the ``MCU switch`` is pressed, the ``GND`` signal should be further passed to the ``MCU Pin``.
 
-  The ``VoltRequest()`` function discussed comes to your rescue. It is supposed to present you with a proper, updated value of your pin at runtime.
+    If you design a component, it is not possible to store state of every other components as they may not have been thought of at the point of creation of your component and number of resources required will be directly proportional to the number of components in the design. The next couple of functions come into picture to address this particular issue.
 
-Role of Incoming Request Handlers
-~~~~~~
+     The ``VoltRequest()`` function discussed comes to your rescue. It is supposed to present you with a proper, updated value of your pin at runtime.
 
- These functions are automatically called by the main program when other components with matching PinId request voltage from your component. Incoming request handlers are to be defined in your component's ``.cpp`` file. Appropriate declaration is to be provided at ``Request Handlers`` section of your ``componentfunctions.h`` file. Next create a case for your component in switch construct of
+  * **Role of Incoming Request Handlers**
 
-   ``VoltSet(void* ComponentAddress, BOOL SimulationStarted, int ImageType, int Index, double Volt, int Source, void* ImageLocation)``
 
- function of ``components.cpp`` file.
+    These functions are automatically called by the main program when other components with matching PinId request voltage from your component. Incoming request handlers are to be defined in your component's ``.cpp`` file. Appropriate declaration is to be provided at ``Request Handlers`` section of your ``componentfunctions.h`` file. Next create a case for your component in switch construct of
 
- * ComponentAddress: This is the pointer to the Structure, that we have created for the component.
- * SimulationStarted: This is boolean type pointer to indicate if the Real Time Simulation is started or not.
- * ImageType: This is required for our switch case construct and not the main program.
- * Index: Zero based index of pin mentioned in rgCompData structure.
- * Volt: Current Voltage value of Pin at index specified above.
- * Source: This is for future use, It mentions source from which this function was called you may ignore this argument for now.
- * ImageLocation: This argument is pointer, pointing to the location of current image being displayed on screen for the component. You may change this value to desired image using ``SetImage(int ImageId, void* ImageLocation)`` function.
-  * ImageId: Pass macro of the image that you want to display eg. ``SWITCH_DISCONNECTED`` or ``SWITCH_CONNECTED`` *(in case of a switch)* to display different image for your component at any time during runtime of your code.
+     ``VoltSet(void* ComponentAddress, BOOL SimulationStarted, int ImageType, int Index, double Volt, int Source, void* ImageLocation)``
 
- eg. Refer to ``SwitchVoltChanged()`` function in ``switch.cpp`` file.
+   function of ``components.cpp`` file.
+
+   * ComponentAddress: This is the pointer to the Structure, that we have created for the component.
+   * SimulationStarted: This is boolean type pointer to indicate if the Real Time Simulation is started or not.
+   * ImageType: This is required for our switch case construct and not the main program.
+   * Index: Zero based index of pin mentioned in rgCompData structure.
+   * Volt: Current Voltage value of Pin at index specified above.
+   * Source: This is for future use, It mentions source from which this function was called you may ignore this argument for now.
+   * ImageLocation: This argument is pointer, pointing to the location of current image being displayed on screen for the component. You may change this value to desired image using ``SetImage(int ImageId, void* ImageLocation)`` function.
+    * ImageId: Pass macro of the image that you want to display eg. ``SWITCH_DISCONNECTED`` or ``SWITCH_CONNECTED`` *(in case of a switch)* to display different image for your component at any time during runtime of your code.
+
+   eg. Refer to ``SwitchVoltChanged()`` function in ``switch.cpp`` file.
 
 6. **Event Handlers**: eg. HandleSwitchEvent()
 
