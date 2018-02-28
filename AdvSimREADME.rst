@@ -181,24 +181,23 @@ Create functions for your components
 
   * **Dynamic Values**
 
-    The situation described below is the only one of the few conditions that may arise in designing a pilot circuit.
+   The situation described below is the only one of the few conditions that may arise in designing a pilot circuit.
 
-     Suppose we have two switches connected in series between ``GND`` signal and micro-controller. We will name the connections ``GND = 'Connection at GND end'``, ``MCU = 'Connection at Micro-controller end'`` and ``CONN = 'Connection Between both switches'``.
+    Suppose we have two switches connected in series between ``GND`` signal and micro-controller. We will name the connections ``GND = 'Connection at GND end'``, ``MCU = 'Connection at Micro-controller end'`` and ``CONN = 'Connection Between both switches'``.
 
-     Now, when switch connected to MCU is pressed, leaving GND switch open, CONN must read 5V because of internal pull up resistors on Micro-controller.
+    Now, when switch connected to MCU is pressed, leaving GND switch open, CONN must read 5V because of internal pull up resistors on Micro-controller.
 
-     If the switch connected to the 'GND' terminal is pressed, ``CONN`` must read ``GND voltage`` irrespective of the condition of ``MCU switch``; at the same time if the ``MCU switch`` is pressed, the ``GND`` signal should be further passed to the ``MCU Pin``.
+    When the switch connected to the 'GND' terminal is pressed, ``CONN`` must read ``GND voltage`` irrespective of the condition of ``MCU switch``; at the same time if the ``MCU switch`` is pressed, the ``GND`` signal should be further passed to the ``MCU Pin``.
 
-    If you design a component, it is not possible to store state of every other components as they may not have been thought of at the point of creation of your component and number of resources required will be directly proportional to the number of components in the design. The next couple of functions come into picture to address this particular issue.
+   While writing a program for a component, it is not possible to store state of every other components as they may not have been thought of at the point of creation of your component and number of resources required will be directly proportional to the number of components in the design. The next couple of functions come into picture to address this particular issue.
 
-     The ``VoltRequest()`` function discussed comes to your rescue. It is supposed to present you with a proper, updated value of your pin at runtime.
+   The ``VoltRequest()`` function discussed comes to your rescue. It is supposed to present you with a proper, updated value of your pin at runtime.
 
   * **Role of Incoming Request Handlers**
 
+   These functions are automatically called by the main program when other components with matching PinId request voltage from your component. Incoming request handlers are to be defined in your component's ``.cpp`` file. Appropriate declaration is to be provided at ``Request Handlers`` section of your ``componentfunctions.h`` file. Next create a case for your component in switch construct of
 
-    These functions are automatically called by the main program when other components with matching PinId request voltage from your component. Incoming request handlers are to be defined in your component's ``.cpp`` file. Appropriate declaration is to be provided at ``Request Handlers`` section of your ``componentfunctions.h`` file. Next create a case for your component in switch construct of
-
-     ``VoltSet(void* ComponentAddress, BOOL SimulationStarted, int ImageType, int Index, double Volt, int Source, void* ImageLocation)``
+    ``VoltSet(void* ComponentAddress, BOOL SimulationStarted, int ImageType, int Index, double Volt, int Source, void* ImageLocation)``
 
    function of ``components.cpp`` file.
 
