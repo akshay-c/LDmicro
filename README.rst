@@ -1,3 +1,7 @@
+Goal of this repository
+======
+This repository is part of FOSSEE fellowship project. For more info visit https://fossee.in/fellowship.
+
 LDMicro
 ======
 LDmicro is a ladder logic editor, simulator and compiler for 8-bit
