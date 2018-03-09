@@ -71,6 +71,27 @@ Next, we need to locate the image that is referred in ``componentimages.h`` file
 
  eg. ``SWITCH_DISCONNECTED     PNG         "img\\switch_disconnected.png"``
 
+Compiling your component files
+~~~~~~~~~~~~
+Add all your program files for new components in the folder ``ldmicro/components``. After creating the required files, edit Makefile_ to add an entry under ``COMPOBJS`` section with the filename you have created with a ``.obj`` extension. Add a ``\``to the previous entry for line continuation.
+
+ Eg. if the COMPOBJS section is as follows:
+ 
+ COMPOBJS  = $(OBJDIR)\components.obj \\
+ 
+			$(OBJDIR)\switch.obj \\
+   
+			$(OBJDIR)\relay.obj
+   
+ and you have created a file for SPDT switch named ``Switch_SPDT.cpp`` under components folder, then the entry must be as follows:
+ 
+ COMPOBJS  = $(OBJDIR)\components.obj \\
+ 
+			$(OBJDIR)\switch.obj \\
+   
+			$(OBJDIR)\relay.obj \\
+   
+   $(OBJDIR)\Switch_SPDT.obj \\
 
 Add Entry to the ComponentList
 ~~~~~~~~
