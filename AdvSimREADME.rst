@@ -253,6 +253,7 @@ Create functions for your components
    * EVENT_MOUSE_RDOWN
    * EVENT_MOUSE_RUP
    * EVENT_MOUSE_DBLCLICK
-   * EVENT_MOUSE_RCLICK``
+   * EVENT_MOUSE_RCLICK
  
 .. _Readme.txt: ldmicro/README.txt
+.. _Makefile: ldmicro/Makefile
