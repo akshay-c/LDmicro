@@ -15,7 +15,7 @@ Before modifying contents of this git account, kindly make sure that you do not 
 
 Building LDMICRO
 ======
-LDmicro is built using Microsoft Visual C++ compiler. Simply execute
+LDmicro is built using Microsoft Visual C++ 2010 Express Edition compiler. Simply execute
 
 make.bat
 
