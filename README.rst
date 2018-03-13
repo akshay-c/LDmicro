@@ -1,6 +1,6 @@
-Goal of this repository
+Goal of this project
 ======
-This repository is part of FOSSEE fellowship project. For more info visit https://fossee.in/fellowship.
+This project is a part of FOSSEE fellowship project. For more info visit https://fossee.in/fellowship.
 
 LDMicro
 ======
