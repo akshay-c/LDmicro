@@ -1,0 +1,232 @@
+///Includes
+#include <wincodec.h>
+#include <stdio.h>
+//#include <string.h>
+#include <commctrl.h>
+#include <Windowsx.h>
+
+#include "componentstructs.h"	
+#include "componentfunctions.h"
+#include "componentimages.h"
+#include "components.h"
+
+///Window handles
+static HWND StateOut1;
+static HWND StateOut2;
+HWND* SettingsDialog;
+
+///Global variables
+enum SPDT_Pins {in = 0, out1, out2};
+
+///Function definitions
+void SetSpdtIds(int* id, void* ComponentAddress)
+{
+	SpdtStruct* s = (SpdtStruct*)ComponentAddress;
+	s->PinId[in] = *id++;
+	s->PinId[out1] = *id++;
+	s->PinId[out2] = *id++;
+
+}
+
+int InitSpdt(void * ComponentAddress)
+{
+	SpdtStruct* s = (SpdtStruct*)ComponentAddress;
+	s->image = SPDT_1;
+	s->NO1 = TRUE;
+	s->Volt[in] = V_OPEN;
+	s->Volt[out1] = V_OPEN;
+	s->Volt[out2] = V_OPEN;
+
+	return SPDT_1;
+}
+
+void MakeSettingsDialog()
+{
+	HWND InitOut = CreateWindowEx(0, WC_BUTTON, ("Initial output"),
+		WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
+		7, 3, 120, 65, *SettingsDialog, NULL, NULL, NULL);
+	FontNice(InitOut);
+
+	StateOut1 = CreateWindowEx(0, WC_BUTTON, ("Output 1"),
+		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
+		16, 21, 100, 20, *SettingsDialog, NULL, NULL, NULL);
+	FontNice(StateOut1);
+
+	StateOut2 = CreateWindowEx(0, WC_BUTTON, ("Output 2"),
+		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
+		16, 41, 100, 20, *SettingsDialog, NULL, NULL, NULL);
+	FontNice(StateOut2);
+}
+
+void LoadSettings(SpdtStruct* s)
+{
+	if (s->NO1)
+		Button_SetCheck(StateOut1, BST_CHECKED);
+	else
+		Button_SetCheck(StateOut2, BST_CHECKED);
+}
+
+BOOL SaveSettings(SpdtStruct* s, void* ImageLocation)
+{
+	BOOL NState1;
+	if (Button_GetState(StateOut1) == BST_CHECKED)
+		NState1 = TRUE;
+	else if (Button_GetState(StateOut2) == BST_CHECKED)
+		NState1 = FALSE;
+	else
+	{
+		MessageBox(*SettingsDialog,
+			("Incomplete"), ("Warning"), MB_OK | MB_ICONWARNING);
+		return FALSE;
+	}
+
+	s->NO1 = NState1;
+
+	if (NState1)
+		s->image = SPDT_1;
+	else
+		s->image = SPDT_2;
+	
+	SetImage(s->image, ImageLocation);
+	RefreshImages();
+
+	return TRUE;
+}
+
+void SpdtSettingsDialog(void* ComponentAddress, void* ImageLocation)
+{
+	SpdtStruct* s = (SpdtStruct*)ComponentAddress;
+	BOOL exitStatus;
+
+	//Create dialog window instance
+	SettingsDialog = CreateDialogWindow("SPDT Settings Dialog", 100, 100, 263, 145, STYLE_VERTICAL);
+	
+	//Make the settings dialog
+	MakeSettingsDialog();
+	
+	//Load settings
+	LoadSettings(s);
+
+	//Show dialog window
+	ShowDialogWindow();
+
+	exitStatus = ProcessDialogWindow();
+	while (exitStatus == FALSE)
+	{
+		exitStatus = SaveSettings(s, ImageLocation);
+		if (exitStatus == TRUE)
+		{
+			//MessageBox(*SettingsDialog,
+			//     ("Saved"), ("Mouse click"), MB_OK | MB_ICONWARNING);
+			break;
+		}
+		else
+		{
+			exitStatus = TRUE;
+			exitStatus = ProcessDialogWindow();
+		}
+	}
+
+	DestroyWindow(*SettingsDialog);
+
+}
+
+//Dynamically check and equalise the voltage on all pins that are connected to SPDT at runtime
+double EqualiseRuntimeVoltage(void* ComponentAdderss, int index = 0)
+{
+	SpdtStruct* s = (SpdtStruct*)ComponentAdderss;
+
+	///Check if input and output 1 are connected
+	if (s->NO1)
+	{
+		///If the input pin is connected to output 1 then output 2 will be open
+		s->Volt[out2] = VoltChange(s->PinId[out2], out2, ComponentAdderss, V_OPEN);
+
+		///Get voltages at the connected pins
+		double volt1 = VoltRequest(s->PinId[0], ComponentAdderss);
+		double volt2 = VoltRequest(s->PinId[out1], ComponentAdderss);
+		
+		///If either pin is grounded then all pins are set to GND
+		if (volt1 == GND || volt2 == GND)
+		{
+			s->Volt[out1] = VoltChange(s->PinId[out1], out1, ComponentAdderss, GND);
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, GND);
+		}
+		///If no pin is grounded then all pins are set to the max voltage of the pins
+		else
+		{
+			s->Volt[out1] = VoltChange(s->PinId[out1], out1, ComponentAdderss, max(volt1, volt2));
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, max(volt1, volt2));
+		}
+	}
+	///If input and output 2 are connected
+	else
+	{
+		///If the input pin is connected to output 2 then output 1 will be open
+		s->Volt[out1] = VoltChange(s->PinId[out1], out1, ComponentAdderss, V_OPEN);
+
+		///Get voltages at the connected pins
+		double volt1 = VoltRequest(s->PinId[0], ComponentAdderss);
+		double volt2 = VoltRequest(s->PinId[out2], ComponentAdderss);
+
+		///If either pin is grounded then all pins are set to GND (Static event)
+		if (volt1 == GND || volt2 == GND)
+		{
+			s->Volt[out2] = VoltChange(s->PinId[out2], out2, ComponentAdderss, GND);
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, GND);
+		}
+		///If no pin is grounded then all pins are set to the max voltage of the pins (Dynamic event)
+		else
+		{
+			s->Volt[out2] = VoltChange(s->PinId[out2], out2, ComponentAdderss, max(volt1, volt2));
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, max(volt1, volt2));
+		}
+	}
+
+	return s->Volt[index];
+}
+
+double SpdtVoltChanged(void * ComponentAddress, BOOL SimulationStarted, int index, double Volt, int Source, void * ImageLocation)
+{
+	if (SimulationStarted)
+		return EqualiseRuntimeVoltage(ComponentAddress, index);
+
+	return Volt;
+}
+
+void ToggleState(SpdtStruct* s, void* ImageLocation)
+{
+	s->image = (s->image == SPDT_1) ? SPDT_2 : SPDT_1;
+	SetImage(s->image, ImageLocation);
+	RefreshImages();
+}
+
+void HandleSpdtEvent(void * ComponentAddress, int Event, BOOL SimulationStarted, void * ImageLocation, UINT ImageId, HWND * h)
+{
+	SpdtStruct* s = (SpdtStruct*)ComponentAddress;
+
+	if (SimulationStarted)
+	{
+		switch (Event)
+		{
+		case EVENT_MOUSE_CLICK:
+			ToggleState(s, ImageLocation);
+			EqualiseRuntimeVoltage(ComponentAddress);
+			break;
+		default:
+			break;
+		}
+	}
+	else
+	{
+		switch (Event)
+		{
+		case EVENT_MOUSE_DBLCLICK:
+			SpdtSettingsDialog(ComponentAddress, ImageLocation);
+			break;
+		default:
+			break;
+		}
+	}
+		
+}
