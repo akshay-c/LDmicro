@@ -14,7 +14,7 @@
 static HWND StateOut1;
 static HWND StateOut2;
 HWND* SettingsDialog;
-
+ 
 ///Global variables
 enum SPDT_Pins {in = 0, out1, out2};
 
@@ -115,11 +115,7 @@ void SpdtSettingsDialog(void* ComponentAddress, void* ImageLocation)
 	{
 		exitStatus = SaveSettings(s, ImageLocation);
 		if (exitStatus == TRUE)
-		{
-			//MessageBox(*SettingsDialog,
-			//     ("Saved"), ("Mouse click"), MB_OK | MB_ICONWARNING);
 			break;
-		}
 		else
 		{
 			exitStatus = TRUE;
@@ -197,6 +193,7 @@ double SpdtVoltChanged(void * ComponentAddress, BOOL SimulationStarted, int inde
 void ToggleState(SpdtStruct* s, void* ImageLocation)
 {
 	s->image = (s->image == SPDT_1) ? SPDT_2 : SPDT_1;
+	s->NO1 = (s->NO1 == TRUE) ? FALSE : TRUE;
 	SetImage(s->image, ImageLocation);
 	RefreshImages();
 }
