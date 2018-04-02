@@ -43,8 +43,17 @@ typedef struct DpstStructTag
 	int id;
 	int image;
 	BOOL NO;          //Whether the inputs and outputs are disconnected (Open)
-	double Volt[4];    // Voltage at Input, Output1, Output2 respectively
+	double Volt[4];    // Voltage at Input1, Input2, Output1, Output2 respectively
 	int PinId[4];
 }DpstStruct;
+
+typedef struct DpdtStructTag
+{
+	int id;
+	int image;
+	BOOL NS1;          //Whether the inputs and outputs are connected in state 1
+	double Volt[6];    // Voltage at Input1, Input2, Output11, Output12, Output21, Output22 respectively
+	int PinId[6];
+}DpdtStruct;
 
 #endif

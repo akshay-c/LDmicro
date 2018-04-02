@@ -127,13 +127,11 @@ void DpstSettingsDialog(void* ComponentAddress, void* ImageLocation)
 	DestroyWindow(*SettingsDialogDPST);
 }
 
-
 //Dynamically check and equalise the voltage on all pins that are connected to DPST at runtime
 double EqualiseRuntimeVoltageDPST(void* ComponentAdderss, int index = 0)
 {
 	return 0; //Edit!!!
 }
-
 
 void ToggleState(DpstStruct* d, void* ImageLocation)
 {

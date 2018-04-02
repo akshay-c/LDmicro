@@ -46,7 +46,8 @@ COMPOBJS  = $(OBJDIR)\components.obj \
 			$(OBJDIR)\switch.obj \
 			$(OBJDIR)\relay.obj \
 			$(OBJDIR)\spdt.obj \
-			$(OBJDIR)\dpst.obj
+			$(OBJDIR)\dpst.obj \
+			$(OBJDIR)\dpdt.obj
 
 HELPOBJ  = $(OBJDIR)\helptext.obj
 
