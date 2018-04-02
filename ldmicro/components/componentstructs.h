@@ -38,4 +38,13 @@ typedef struct SpdtStructTag
 	int PinId[3];
 }SpdtStruct;
 
+typedef struct DpstStructTag
+{
+	int id;
+	int image;
+	BOOL NO;          //Whether the inputs and outputs are disconnected (Open)
+	double Volt[4];    // Voltage at Input, Output1, Output2 respectively
+	int PinId[4];
+}DpstStruct;
+
 #endif

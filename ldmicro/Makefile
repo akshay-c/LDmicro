@@ -45,7 +45,8 @@ LDOBJS   = $(OBJDIR)\ldmicro.obj \
 COMPOBJS  = $(OBJDIR)\components.obj \
 			$(OBJDIR)\switch.obj \
 			$(OBJDIR)\relay.obj \
-			$(OBJDIR)\spdt.obj
+			$(OBJDIR)\spdt.obj \
+			$(OBJDIR)\dpst.obj
 
 
 HELPOBJ  = $(OBJDIR)\helptext.obj
@@ -77,7 +78,7 @@ all: $(OBJDIR)/ldmicro.exe $(OBJDIR)/ldinterpret.exe
 
 clean:
 	rm -rf $(LDOBJS) $(COMPOBJS) $(CLEANOBJ) 
-        rmdir reg\results
+    rmdir reg\results
 
 lang.cpp: $(OBJDIR)/lang-tables.h
 
