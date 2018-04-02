@@ -48,7 +48,6 @@ COMPOBJS  = $(OBJDIR)\components.obj \
 			$(OBJDIR)\spdt.obj \
 			$(OBJDIR)\dpst.obj
 
-
 HELPOBJ  = $(OBJDIR)\helptext.obj
 
 CLEANOBJ  = $(OBJDIR)\helptext.cpp \

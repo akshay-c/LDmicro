@@ -13,7 +13,7 @@
 ///Window handles
 static HWND StateOut1;
 static HWND StateOut2;
-HWND* SettingsDialog;
+HWND* SettingsDialogSPDT;
  
 ///Global variables
 enum SPDT_Pins {in = 0, out1, out2};
@@ -40,21 +40,21 @@ int InitSpdt(void * ComponentAddress)
 	return SPDT_1;
 }
 
-void MakeSettingsDialog()
+void MakeSettingsDialogSPDT()
 {
 	HWND InitOut = CreateWindowEx(0, WC_BUTTON, ("Initial output"),
 		WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
-		7, 3, 120, 65, *SettingsDialog, NULL, NULL, NULL);
+		7, 3, 120, 65, *SettingsDialogSPDT, NULL, NULL, NULL);
 	FontNice(InitOut);
 
 	StateOut1 = CreateWindowEx(0, WC_BUTTON, ("Output 1"),
 		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
-		16, 21, 100, 20, *SettingsDialog, NULL, NULL, NULL);
+		16, 21, 100, 20, *SettingsDialogSPDT, NULL, NULL, NULL);
 	FontNice(StateOut1);
 
 	StateOut2 = CreateWindowEx(0, WC_BUTTON, ("Output 2"),
 		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-		16, 41, 100, 20, *SettingsDialog, NULL, NULL, NULL);
+		16, 41, 100, 20, *SettingsDialogSPDT, NULL, NULL, NULL);
 	FontNice(StateOut2);
 }
 
@@ -75,7 +75,7 @@ BOOL SaveSettings(SpdtStruct* s, void* ImageLocation)
 		NState1 = FALSE;
 	else
 	{
-		MessageBox(*SettingsDialog,
+		MessageBox(*SettingsDialogSPDT,
 			("Incomplete"), ("Warning"), MB_OK | MB_ICONWARNING);
 		return FALSE;
 	}
@@ -99,10 +99,10 @@ void SpdtSettingsDialog(void* ComponentAddress, void* ImageLocation)
 	BOOL exitStatus;
 
 	//Create dialog window instance
-	SettingsDialog = CreateDialogWindow("SPDT Settings Dialog", 100, 100, 263, 145, STYLE_VERTICAL);
+	SettingsDialogSPDT = CreateDialogWindow("SPDT Settings Dialog", 100, 100, 263, 145, STYLE_VERTICAL);
 	
 	//Make the settings dialog
-	MakeSettingsDialog();
+	MakeSettingsDialogSPDT();
 	
 	//Load settings
 	LoadSettings(s);
@@ -123,12 +123,12 @@ void SpdtSettingsDialog(void* ComponentAddress, void* ImageLocation)
 		}
 	}
 
-	DestroyWindow(*SettingsDialog);
+	DestroyWindow(*SettingsDialogSPDT);
 
 }
 
 //Dynamically check and equalise the voltage on all pins that are connected to SPDT at runtime
-double EqualiseRuntimeVoltage(void* ComponentAdderss, int index = 0)
+double EqualiseRuntimeVoltageSPDT(void* ComponentAdderss, int index = 0)
 {
 	SpdtStruct* s = (SpdtStruct*)ComponentAdderss;
 
@@ -185,7 +185,7 @@ double EqualiseRuntimeVoltage(void* ComponentAdderss, int index = 0)
 double SpdtVoltChanged(void * ComponentAddress, BOOL SimulationStarted, int index, double Volt, int Source, void * ImageLocation)
 {
 	if (SimulationStarted)
-		return EqualiseRuntimeVoltage(ComponentAddress, index);
+		return EqualiseRuntimeVoltageSPDT(ComponentAddress, index);
 
 	return Volt;
 }
@@ -208,7 +208,7 @@ void HandleSpdtEvent(void * ComponentAddress, int Event, BOOL SimulationStarted,
 		{
 		case EVENT_MOUSE_CLICK:
 			ToggleState(s, ImageLocation);
-			EqualiseRuntimeVoltage(ComponentAddress);
+			EqualiseRuntimeVoltageSPDT(ComponentAddress);
 			break;
 		default:
 			break;
@@ -224,6 +224,5 @@ void HandleSpdtEvent(void * ComponentAddress, int Event, BOOL SimulationStarted,
 		default:
 			break;
 		}
-	}
-		
+	}	
 }
