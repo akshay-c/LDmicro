@@ -130,7 +130,56 @@ void DpstSettingsDialog(void* ComponentAddress, void* ImageLocation)
 //Dynamically check and equalise the voltage on all pins that are connected to DPST at runtime
 double EqualiseRuntimeVoltageDPST(void* ComponentAdderss, int index = 0)
 {
-	return 0; //Edit!!!
+	DpstStruct* d = (DpstStruct*)ComponentAdderss;
+	
+	///Check if the switch is open	
+	if (d->NO)
+	{
+		///If switch is open then all terminals will be floating/open
+		d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, V_OPEN);
+		d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, V_OPEN);
+		d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, V_OPEN);
+		d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, V_OPEN);
+	}
+	///If the switch is connected
+	else
+	{
+		double Vin = VoltRequest(d->PinId[in1], ComponentAdderss);
+		double Vout = VoltRequest(d->PinId[out1], ComponentAdderss);
+
+		///Equalise voltage for input 1 output 1 pair
+		///If either pin is grounded then all pins are set to GND (Static event)
+		if (Vin == GND || Vout == GND)
+		{
+			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, GND);
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, GND);
+		}
+		///If no pin is grounded then all pins are set to the max voltage of the pins (Dynamic event)
+		else
+		{
+			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, max(Vin, Vout));
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, max(Vin, Vout));
+		}
+
+		Vin = VoltRequest(d->PinId[in1], ComponentAdderss);
+		Vout = VoltRequest(d->PinId[out1], ComponentAdderss);
+
+		///Equalise voltage for input 2 output 2 pair
+		///If either pin is grounded then all pins are set to GND (Static event)
+		if (Vin == GND || Vout == GND)
+		{
+			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, GND);
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, GND);
+		}
+		///If no pin is grounded then all pins are set to the max voltage of the pins (Dynamic event)
+		else
+		{
+			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, max(Vin, Vout));
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, max(Vin, Vout));
+		}
+	}
+
+	return d->Volt[index];
 }
 
 void ToggleState(DpstStruct* d, void* ImageLocation)

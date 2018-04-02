@@ -134,7 +134,11 @@ void DpdtSettingsDialog(void* ComponentAddress, void* ImageLocation)
 //Dynamically check and equalise the voltage on all pins that are connected to DPST at runtime
 double EqualiseRuntimeVoltageDPDT(void* ComponentAdderss, int index = 0)
 {
-	return 0; //Edit!!!
+	DpdtStruct* d = (DpdtStruct*)ComponentAdderss;
+
+	//To be finished
+
+	return d->Volt[index];
 }
 
 void ToggleState(DpdtStruct* d, void* ImageLocation)
@@ -147,6 +151,7 @@ void ToggleState(DpdtStruct* d, void* ImageLocation)
 
 void HandleDpdtEvent(void * ComponentAddress, int Event, BOOL SimulationStarted, void * ImageLocation, UINT ImageId, HWND * h)
 {
+
 	DpdtStruct* d = (DpdtStruct*)ComponentAddress;
 	
 	if (SimulationStarted)
