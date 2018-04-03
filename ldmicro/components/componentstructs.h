@@ -29,4 +29,17 @@ typedef struct RelayStructTag
 
 }RelayStruct;
 
+typedef struct SpdtStructTag
+{
+    int     id;
+    int     Image;
+    BOOL    Latched;                   //Temporary/Latched Action
+    BOOL    NCircuit;                     
+    BOOL    Circuit;               //Circuit Position 0 or 1
+    char    Name[15];
+    double  Volt[3];
+    int     PinId[3];
+
+}SpdtStruct;
+
 #endif

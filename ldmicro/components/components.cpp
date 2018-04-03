@@ -49,6 +49,10 @@ size_t GetStructSize(int ComponentId)
         case COMPONENT_RELAY:
             return sizeof(RelayStruct);
         break;
+        case COMPONENT_SPDT:
+            return sizeof(SpdtStruct);
+        break;
+
     }
     return (size_t)-1;
 }
@@ -64,6 +68,10 @@ int InitializeComponentProperties(void *ComponentAddress, int ComponentId)
         case COMPONENT_RELAY:
             return InitRelay(ComponentAddress);
         break;
+	  case COMPONENT_SPDT:
+            return InitSpdt(ComponentAddress);
+        break;
+
     }
     return 0;
 }
@@ -97,7 +105,11 @@ void  	SetPinIds(int Index, void *PinName,int ComponentId, void *ComponentAddres
             break;
             case COMPONENT_RELAY:
                 SetRelayIds(PinIds,ComponentAddress);
-        }
+		 break;
+       	 case  COMPONENT_SPDT:
+                SetSpdtIds(PinIds, ComponentAddress);
+            break;
+	  }
     }
 }
 
