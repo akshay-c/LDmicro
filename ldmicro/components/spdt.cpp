@@ -139,7 +139,7 @@ double EqualiseRuntimeVoltageSPDT(void* ComponentAdderss, int index = 0)
 		s->Volt[out2] = VoltChange(s->PinId[out2], out2, ComponentAdderss, V_OPEN);
 
 		///Get voltages at the connected pins
-		double volt1 = VoltRequest(s->PinId[0], ComponentAdderss);
+		double volt1 = VoltRequest(s->PinId[in], ComponentAdderss);
 		double volt2 = VoltRequest(s->PinId[out1], ComponentAdderss);
 		
 		///If either pin is grounded then all pins are set to GND

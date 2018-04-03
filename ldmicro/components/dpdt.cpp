@@ -136,7 +136,88 @@ double EqualiseRuntimeVoltageDPDT(void* ComponentAdderss, int index = 0)
 {
 	DpdtStruct* d = (DpdtStruct*)ComponentAdderss;
 
-	//To be finished
+	///Check if DPDT switch is in state 1; i.e Input 1 is connected to output11, Input 2 is connected to output21
+	if (d->NS1)
+	{
+		///If DPDT switch is in state 1 then output12 and output22 will be floating/open
+		d->Volt[out12] = VoltChange(d->PinId[out12], out12, ComponentAdderss, V_OPEN);
+		d->Volt[out22] = VoltChange(d->PinId[out22], out22, ComponentAdderss, V_OPEN);
+
+		///Get voltages at the connected pins
+		double Vin = VoltRequest(d->PinId[in1], ComponentAdderss);
+		double Vout = VoltRequest(d->PinId[out11], ComponentAdderss);
+
+		///Set 1: input 1, output11, output12
+		///If either pin is grounded then all pins are set to GND
+		if (Vin == GND || Vout == GND)
+		{
+			d->Volt[out11] = VoltChange(d->PinId[out11], out11, ComponentAdderss, GND);
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, GND);
+		}
+		///If no pin is grounded then all pins are set to the max voltage of the pins
+		else
+		{
+			d->Volt[out11] = VoltChange(d->PinId[out11], out11, ComponentAdderss, max(Vin, Vout));
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, max(Vin, Vout));
+		}
+
+		Vin = VoltRequest(d->PinId[in2], ComponentAdderss);
+		Vout = VoltRequest(d->PinId[out21], ComponentAdderss);
+		///Set 2: input 2, output21, output22
+		///If either pin is grounded then all pins are set to GND
+		if (Vin == GND || Vout == GND)
+		{
+			d->Volt[out21] = VoltChange(d->PinId[out21], out21, ComponentAdderss, GND);
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, GND);
+		}
+		///If no pin is grounded then all pins are set to the max voltage of the pins
+		else
+		{
+			d->Volt[out21] = VoltChange(d->PinId[out21], out21, ComponentAdderss, max(Vin, Vout));
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, max(Vin, Vout));
+		}
+	}
+	///Check if DPDT switch is in state 2; i.e Input 1 is connected to output12, Input 2 is connected to output22
+	else
+	{
+		///If DPDT switch is in state 2 then output11 and output21 will be floating/open
+		d->Volt[out11] = VoltChange(d->PinId[out11], out11, ComponentAdderss, V_OPEN);
+		d->Volt[out21] = VoltChange(d->PinId[out21], out21, ComponentAdderss, V_OPEN);
+
+		///Get voltages at the connected pins
+		double Vin = VoltRequest(d->PinId[in1], ComponentAdderss);
+		double Vout = VoltRequest(d->PinId[out12], ComponentAdderss);
+
+		///Set 1: input 1, output11, output12
+		///If either pin is grounded then all pins are set to GND
+		if (Vin == GND || Vout == GND)
+		{
+			d->Volt[out12] = VoltChange(d->PinId[out12], out12, ComponentAdderss, GND);
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, GND);
+		}
+		///If no pin is grounded then all pins are set to the max voltage of the pins
+		else
+		{
+			d->Volt[out12] = VoltChange(d->PinId[out12], out12, ComponentAdderss, max(Vin, Vout));
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, max(Vin, Vout));
+		}
+
+		Vin = VoltRequest(d->PinId[in2], ComponentAdderss);
+		Vout = VoltRequest(d->PinId[out22], ComponentAdderss);
+		///Set 2: input 2, output21, output22
+		///If either pin is grounded then all pins are set to GND
+		if (Vin == GND || Vout == GND)
+		{
+			d->Volt[out22] = VoltChange(d->PinId[out22], out22, ComponentAdderss, GND);
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, GND);
+		}
+		///If no pin is grounded then all pins are set to the max voltage of the pins
+		else
+		{
+			d->Volt[out22] = VoltChange(d->PinId[out22], out22, ComponentAdderss, max(Vin, Vout));
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, max(Vin, Vout));
+		}
+	}
 
 	return d->Volt[index];
 }
