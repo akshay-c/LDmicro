@@ -10,56 +10,29 @@
 #include "components.h"
 
 static HWND TemporaryRadio;
-static HWND LatchedRadio;
 static HWND Circuit1Radio;
 static HWND Circuit2Radio;
 static HWND NameTextbox;
-static HWND InNameTextbox;
-static HWND OutNameTextbox;
 HWND* SpdtDialog;
+
 
 void SpdtStateChanged(SpdtStruct* SpdtData, void* ImageLocation);
 void MakeSpdtControls()
 {
-    HWND ActionGrouper = CreateWindowEx(0, WC_BUTTON, ("Action"),
+    HWND ActionGrouper = CreateWindowEx(0, WC_BUTTON, ("Default Shorted Circuit"),
         WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
         7, 3, 120, 65, *SpdtDialog, NULL, NULL, NULL);
     FontNice(ActionGrouper);
 
-    LatchedRadio = CreateWindowEx(0, WC_BUTTON, ("Latched"),
+    Circuit1Radio = CreateWindowEx(0, WC_BUTTON, ("Circuit 1"),
         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
         16, 21, 100, 20, *SpdtDialog, NULL, NULL, NULL);
-    FontNice(LatchedRadio);
-
-    TemporaryRadio = CreateWindowEx(0, WC_BUTTON, ("Temporary"),
-        WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-        16, 41, 100, 20, *SpdtDialog, NULL, NULL, NULL);
-    FontNice(TemporaryRadio);
-
-    // SetOnlyRadio = CreateWindowEx(0, WC_BUTTON, _("(S) Set-Only"),
-    //     WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-    //     16, 61, 100, 20, CoilDialog, NULL, Instance, NULL);
-    // NiceFont(SetOnlyRadio);
-
-    // ResetOnlyRadio = CreateWindowEx(0, WC_BUTTON, _("(R) Reset-Only"),
-    //     WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-    //     16, 81, 105, 20, CoilDialog, NULL, Instance, NULL);
-    // NiceFont(ResetOnlyRadio);
-
-    HWND PositionGrouper = CreateWindowEx(0, WC_BUTTON, ("Position"),
-        WS_CHILD | BS_GROUPBOX | WS_VISIBLE,
-        140, 3, 120, 65, *SpdtDialog, NULL, NULL, NULL);
-    FontNice(PositionGrouper);
-
-    Circuit1Radio = CreateWindowEx(0, WC_BUTTON, ("Circuit 1"),
-        WS_CHILD | BS_AUTORADIOBUTTON | WS_VISIBLE | WS_GROUP | WS_TABSTOP,
-        149, 21, 100, 20, *SpdtDialog, NULL, NULL, NULL);
     FontNice(Circuit1Radio);
 
     Circuit2Radio = CreateWindowEx(0, WC_BUTTON, ("Circuit 2"),
-        WS_CHILD | BS_AUTORADIOBUTTON | WS_VISIBLE | WS_TABSTOP,
-        149, 41, 100, 20, *SpdtDialog, NULL, NULL, NULL);
-    FontNice(Circuit2Radio); 
+        WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
+        16, 41, 100, 20, *SpdtDialog, NULL, NULL, NULL);
+    FontNice(Circuit2Radio);
 
     HWND textLabel = CreateWindowEx(0, WC_STATIC, ("Name:"),
         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
@@ -77,36 +50,27 @@ void MakeSpdtControls()
 
 void LoadState(SpdtStruct* Data)
 {
-    if(Data->Latched)
+    if(Data->Circuit)
     {
-        Button_SetCheck(LatchedRadio, BST_CHECKED);
+        Button_SetCheck(Circuit2Radio, BST_CHECKED);
     }else
-    {
-        Button_SetCheck(TemporaryRadio, BST_CHECKED);
-    }
-    if(Data->NCircuit)
     {
         Button_SetCheck(Circuit1Radio, BST_CHECKED);
     }
-    else
-    {
-        Button_SetCheck(Circuit2Radio, BST_CHECKED);
-    }
-    Edit_SetText(NameTextbox, Data->Name);
 }
 
 
 BOOL SaveSpdtDialog(SpdtStruct* Data)
 {
     char temp[15];
-    BOOL Latched, NCircuit;
-    if(Button_GetState(LatchedRadio) == BST_CHECKED)
+    BOOL Circuit;
+    if(Button_GetState(Circuit1Radio) == BST_CHECKED)
     {
-        Latched = TRUE;
+        Circuit = FALSE;
             
-    }else if(Button_GetState(TemporaryRadio) == BST_CHECKED)
+    }else if(Button_GetState(Circuit2Radio) == BST_CHECKED)
     {
-        Latched = FALSE;
+        Circuit = TRUE;
     }else
     {
         MessageBox(*SpdtDialog,
@@ -114,19 +78,6 @@ BOOL SaveSpdtDialog(SpdtStruct* Data)
         return FALSE;
     }
 
-    if(Button_GetState(Circuit1Radio) == BST_CHECKED)
-    {
-        NCircuit = TRUE;
-            
-    }else if(Button_GetState(Circuit2Radio) == BST_CHECKED)
-    {
-        NCircuit = FALSE;
-    }else
-    {
-        MessageBox(*SpdtDialog,
-            ("Incomplete"), ("Warning"), MB_OK | MB_ICONWARNING);
-        return FALSE;
-    }
     if(Edit_GetText(NameTextbox, (LPSTR)&temp, 15) < 1)
     {
         MessageBox(*SpdtDialog,
@@ -134,17 +85,15 @@ BOOL SaveSpdtDialog(SpdtStruct* Data)
         return FALSE;
     }else
     {
-        Data->Latched = Latched;
-        Data-> NCircuit = NCircuit;
-        Data-> Circuit = NCircuit;
+        Data-> Circuit = Circuit;
         strcpy(Data->Name, temp);
-        if(NCircuit)
+        if(Circuit)
         {
-            Data->Image =SPDT_SWITCH_1;
+            Data->Image =SPDT_SWITCH_2;
         }
         else
         {
-            Data->Image =SPDT_SWITCH_2;
+            Data->Image =SPDT_SWITCH_1;
         }
     }
     return TRUE;
@@ -181,8 +130,6 @@ int InitSpdt(void* ComponentAddress)
 {
     SpdtStruct* temp = (SpdtStruct*)ComponentAddress;
     temp->Image = SPDT_SWITCH_1;
-    temp->Latched = TRUE;
-    temp->NCircuit = FALSE;
     temp->Circuit = FALSE;
     temp->Volt[0] = V_OPEN;
     temp->Volt[1] = V_OPEN;
@@ -192,117 +139,81 @@ int InitSpdt(void* ComponentAddress)
 }
 
 
-void UpdateValues(SpdtStruct* Switch, void* ComponentAddress)
+double UpdateValues(void* ComponentAddress, int i=0)
 {
     /*char Debug[256];
     sprintf_s(Debug, "Clicked: %p\n", ComponentAddress);
     OutputDebugString(Debug);*/
+	SpdtStruct* Switch = (SpdtStruct*)ComponentAddress;
+
     if(Switch->Circuit)
         {
-            Switch->Volt[0] =
-                VoltChange(Switch->PinId[0], 0, ComponentAddress, V_OPEN);
             Switch->Volt[1] =
                 VoltChange(Switch->PinId[1], 1, ComponentAddress, V_OPEN);
-            Switch->Volt[2] =
-                VoltChange(Switch->PinId[2], 2, ComponentAddress, V_OPEN);
-            // char vx[3],vy[10];
-            // _gcvt(Switch->Volt[0],8,vy);
-            // _itoa(Switch->PinId[0],vx,10);
-            // MessageBox(NULL,
-            //    (vx),(vy), MB_OK | MB_ICONWARNING);
-            // Switch->Volt[1] = GlobalVoltChange(Switch->PinId[1], ComponentAddress, V_OPEN);
-            // MessageBox(NULL,
-            //         "Open", "Test", MB_OK | MB_ICONWARNING);
-        }
-        else
-        {
+
             double Voltage;
             Voltage = VoltRequest(Switch->PinId[0], ComponentAddress);
             Switch->Volt[0] = Voltage;
-            Voltage = VoltRequest(Switch->PinId[1], ComponentAddress);
-            Switch->Volt[1] = Voltage;
             Voltage = VoltRequest(Switch->PinId[2], ComponentAddress);
             Switch->Volt[2] = Voltage;
 
-            if (Switch->Circuit==FALSE)
+
+            if(Switch->Volt[0]==GND || Switch->Volt[2]==GND)
             {
-         	   if(Switch->Volt[0] > Switch->Volt[1])
-           		{
-        	        /*sprintf_s(Debug, "Values2: Volt1:%f \t Volt2:%f \tAddr: %p \tPin0:%d \t Pin1:%d\n",
-        			Switch->Volt[0], Switch->Volt[1], ComponentAddress, Switch->PinId[0], Switch->PinId[1]);
-           	    	OutputDebugString(Debug);*/
-               		Switch->Volt[0] = VoltChange(Switch->PinId[0], 0,
-                    ComponentAddress, Switch->Volt[1]);
-            	}
-            	else if(Switch->Volt[1] > Switch->Volt[0])
-            	{
-              		/*sprintf_s(Debug, "Values3: Volt1:%f \t Volt2:%f \tAddr: %p \tPin0:%d \t Pin1:%d\n",
-        			Switch->Volt[0], Switch->Volt[1], ComponentAddress, Switch->PinId[0], Switch->PinId[1]);
-             		OutputDebugString(Debug);*/
-                	Switch->Volt[1] = VoltChange(Switch->PinId[1], 1,
-                    ComponentAddress, Switch->Volt[0]);
-                
-            	}
-        	}
-        	else
+            	Switch->Volt[2]=VoltChange(Switch->PinId[2], 2, ComponentAddress, GND);
+            	Switch->Volt[0]=VoltChange(Switch->PinId[0],0,ComponentAddress,GND);
+            }
+            else
             {
-         	   if(Switch->Volt[0] > Switch->Volt[2])
-           		{
-        	        /*sprintf_s(Debug, "Values2: Volt1:%f \t Volt2:%f \tAddr: %p \tPin0:%d \t Pin1:%d\n",
-        			Switch->Volt[0], Switch->Volt[1], ComponentAddress, Switch->PinId[0], Switch->PinId[1]);
-           	    	OutputDebugString(Debug);*/
-               		Switch->Volt[0] = VoltChange(Switch->PinId[0], 0,
-                    ComponentAddress, Switch->Volt[2]);
-            	}
-            	else if(Switch->Volt[2] > Switch->Volt[0])
-            	{
-              		/*sprintf_s(Debug, "Values3: Volt1:%f \t Volt2:%f \tAddr: %p \tPin0:%d \t Pin1:%d\n",
-        			Switch->Volt[0], Switch->Volt[1], ComponentAddress, Switch->PinId[0], Switch->PinId[1]);
-             		OutputDebugString(Debug);*/
-                	Switch->Volt[2] = VoltChange(Switch->PinId[2], 1,
-                    ComponentAddress, Switch->Volt[0]);
-                
-            	}
-        	}
+            	double tempvolt=max(VoltRequest(Switch->PinId[0], ComponentAddress),VoltRequest(Switch->PinId[2], ComponentAddress));
+            	Switch->Volt[2]=VoltChange(Switch->PinId[2],2,ComponentAddress,tempvolt);
+            	Switch->Volt[0]=VoltChange(Switch->PinId[0],0,ComponentAddress,tempvolt);
+            }
         }
-        /*sprintf_s(Debug, "Values: Volt1:%f \t Volt2:%f \tAddr: %p \tPin0:%d \t Pin1:%d\n",
-        Switch->Volt[0], Switch->Volt[1], ComponentAddress, Switch->PinId[0], Switch->PinId[1]);
-    OutputDebugString(Debug);*/
+
+    else
+    	{
+    		Switch->Volt[2] =
+                VoltChange(Switch->PinId[2], 2, Switch, V_OPEN);
+
+            double Voltage;
+            Voltage = VoltRequest(Switch->PinId[0], Switch);
+            Switch->Volt[0] = Voltage;
+            Voltage = VoltRequest(Switch->PinId[1], Switch);
+            Switch->Volt[1] = Voltage;
+
+
+            if(Switch->Volt[0]==GND || Switch->Volt[1]==GND)
+            {
+            	Switch->Volt[1]=VoltChange(Switch->PinId[1], 1, ComponentAddress, GND);
+            	Switch->Volt[0]=VoltChange(Switch->PinId[0],0,ComponentAddress,GND);
+            }
+            else
+            {
+            double tempvolt=max(VoltRequest(Switch->PinId[0], ComponentAddress),VoltRequest(Switch->PinId[1], ComponentAddress));
+            	Switch->Volt[1]=VoltChange(Switch->PinId[1],1,ComponentAddress,tempvolt);
+            	Switch->Volt[0]=VoltChange(Switch->PinId[0],0,ComponentAddress,tempvolt);
+            }
+	    }    	
+ return Switch->Volt[i];
 }
 
 
 void HandleSpdtEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
     void* ImageLocation, UINT ImageId, HWND* h)
 {
-    SpdtStruct *temp = (SpdtStruct*)ComponentAddress;
+    SpdtStruct* temp = (SpdtStruct*)ComponentAddress;
 
     if(SimulationStarted)
     {
-        switch(Event){
-            case EVENT_MOUSE_UP:
-                if(temp->Latched)
-                {
-                    temp->Circuit = !temp->Circuit;
-                    /*MessageBox(NULL,
-                    "Latched", "Test", MB_OK | MB_ICONWARNING);*/
-                }
-                else
-                {
-                    temp->Circuit = temp->NCircuit;
-                    // MessageBox(NULL,
-                    // "Latched", "Test", MB_OK | MB_ICONWARNING);
-                }
-                SpdtStateChanged(temp, ImageLocation);
-                UpdateValues(temp, ComponentAddress);
-            break;
-            case EVENT_MOUSE_DOWN:
-                if(!temp->Latched)
-                {
-                    temp->Circuit = !temp->NCircuit;
-                    SpdtStateChanged(temp, ImageLocation);
-                    UpdateValues(temp, ComponentAddress);
-                }
-            break;
+        switch(Event)
+        {
+            case EVENT_MOUSE_CLICK:
+            	SpdtStateChanged(temp,ImageLocation);
+            	UpdateValues(ComponentAddress);
+            	break;
+         	default:
+         		break;
         }
         
     }
@@ -313,14 +224,16 @@ void HandleSpdtEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
             	ShowSpdtDialog(ComponentAddress);
                 SetImage(temp->Image, ImageLocation);
                 RefreshImages();
-            break;
+            	break;
+            default:
+            	break;
     }
     }
 }
 
 void SpdtStateChanged(SpdtStruct* SpdtData, void* ImageLocation)
 {
-    SetImage(SpdtData->Circuit ? SPDT_SWITCH_1 : SPDT_SWITCH_2,
+    SetImage(SpdtData->Circuit ? SPDT_SWITCH_2 : SPDT_SWITCH_1,
             ImageLocation);
         RefreshImages();
 }
@@ -328,54 +241,21 @@ void SpdtStateChanged(SpdtStruct* SpdtData, void* ImageLocation)
 double SpdtVoltChanged(void* SpdtData, BOOL SimulationStarted, int Index,
     double Volt, int Source, void* ImageLocation)
 {
+
     // char Debug[256];
     SpdtStruct* temp = (SpdtStruct*)SpdtData;
     if(SimulationStarted)
-    {
-        double Voltage;
-        Voltage = VoltRequest(temp->PinId[!Index], SpdtData);
-        if(temp->Circuit)
-        {
-            temp->Volt[!Index] = VoltChange(temp->PinId[!Index], !Index, SpdtData, V_OPEN);
-            temp->Volt[Index] = V_OPEN;
-            /*sprintf_s(Debug, "SwitchVoltChanged: \tAddress: %p \tVolt0:%f \t Volt1:%f\n",
-        SwitchData, Voltage, Volt);
-    OutputDebugString(Debug);*/
-            return temp->Volt[Index];
-        }
-        if(Voltage > Volt)
-        {
-            temp->Volt[Index] = Volt;
-            temp->Volt[!Index] = VoltChange(temp->PinId[!Index], !Index, SpdtData, Volt);
-            /*sprintf_s(Debug, "SwitchVoltChanged2: \tAddress: %p \tVolt0:%f \t Volt1:%f\n",
-        SwitchData, Voltage, Volt);
-    OutputDebugString(Debug);*/
-            return temp->Volt[Index];
-        }
-        else
-        {
-            // temp->Volt[!Index] = VoltChange(temp->PinId[!Index], !Index, SwitchData, Volt);
-            Voltage = VoltChange(temp->PinId[!Index], !Index, SpdtData, Volt);
-            temp->Volt[Index] = Voltage;
-            // VoltChange(temp->PinId[!Index], !Index, SwitchData, Volt);
-            return Voltage;
-        }
-    }
-    else
-    {
-        temp->Volt[Index] = Volt;
-        return Volt;
-    }
-    return 0;
+    	return UpdateValues(SpdtData,Index);
+    return Volt;
 }
 
 
 void SetSpdtIds(int* id,void* ComponentAddress)
 {
-    SpdtStruct *s = (SpdtStruct*)ComponentAddress;
+    SpdtStruct* s = (SpdtStruct*)ComponentAddress;
     s->PinId[0] = *id++;
     s->PinId[1] = *id++;
-    s->PinId[2] = *id;
+    s->PinId[2] = *id++;
     /*char Debug[256];
     sprintf_s(Debug, "SetSwitchIds: \tAddr1: %p \tAddr2: %p \tPin0:%d \t Pin1:%d \tVolt0: %f Volt1: %f\n",
         ComponentAddress, s, s->PinId[0], s->PinId[1],VoltRequest(s->PinId[0], ComponentAddress),

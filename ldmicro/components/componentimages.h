@@ -35,7 +35,7 @@ void SetImage(int Component, void *il);
 static ComponentData rgCompData[TOTAL_COMPONENTS] = {
     {0, COMPONENT_SWITCH, TEXT("Switch"), 2, {"Input:", "Output:"}},
     {1, COMPONENT_RELAY, TEXT("Relay"), 5, {"Coil1:", "Coil2:", "NO:", "COM:", "NC:"}},
-	{2, COMPONENT_SPDT, TEXT("SPDT"), 3, {"Input:", "Output1", "Output2"}}
+	{2, COMPONENT_SPDT, TEXT("SPDT"), 3, {"Input:", "Output1:", "Output2:"}}
 };
 
 #endif

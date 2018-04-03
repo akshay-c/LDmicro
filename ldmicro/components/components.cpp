@@ -89,6 +89,9 @@ double VoltSet(void* ComponentAddress, BOOL SimulationStarted, int ImageType, in
         break;
         case COMPONENT_RELAY:
             return RelayVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
+    	case COMPONENT_SPDT:
+            return SpdtVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
+    
     }
     return Volt;
 }
@@ -105,8 +108,8 @@ void  	SetPinIds(int Index, void *PinName,int ComponentId, void *ComponentAddres
             break;
             case COMPONENT_RELAY:
                 SetRelayIds(PinIds,ComponentAddress);
-		 break;
-       	 case  COMPONENT_SPDT:
+			break;
+       		case  COMPONENT_SPDT:
                 SetSpdtIds(PinIds, ComponentAddress);
             break;
 	  }
@@ -135,6 +138,10 @@ int NotifyComponent(void *ComponentAddress, void *PinName, int ComponentId,
         break;
         case COMPONENT_RELAY:
             HandleRelayEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
+            // return InitRelay(ComponentAddress);
+        break;
+        case COMPONENT_SPDT:
+            HandleSpdtEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
             // return InitRelay(ComponentAddress);
         break;
     }
