@@ -1,3 +1,14 @@
+/* DPDT component file
+* Code version: 2.0
+* Version description: Adds latching functionality to component
+* Version steability:
+*	GUI -> Stable
+*	Functionality -> No known bugs.
+* Bugs:
+*	1. -
+*
+*/
+
 ///Includes
 #include <wincodec.h>
 #include <stdio.h>

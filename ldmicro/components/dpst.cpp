@@ -1,3 +1,14 @@
+/* DPST component file
+* Code version: 2.1
+* Version description: Fixes minor bugs in v2.0
+* Version steability:
+*	GUI -> Stable
+*	Functionality -> Bugs found.
+* Bugs:
+*	1. Voltages dont load properly during simulation when the "Switch" component controls input pin of the DPST component.
+*
+*/
+
 ///Includes
 #include <wincodec.h>
 #include <stdio.h>
