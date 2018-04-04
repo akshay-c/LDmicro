@@ -49,6 +49,15 @@ size_t GetStructSize(int ComponentId)
         case COMPONENT_RELAY:
             return sizeof(RelayStruct);
         break;
+		case COMPONENT_SPDT_switch:
+			return sizeof(SPDTStruct);
+		break;
+		case COMPONENT_DPST_switch:
+			return sizeof(DPSTStruct);
+		break;
+		case COMPONENT_DPDT_switch:
+			return sizeof(DPDTStruct);
+		break;
     }
     return (size_t)-1;
 }
@@ -64,6 +73,15 @@ int InitializeComponentProperties(void *ComponentAddress, int ComponentId)
         case COMPONENT_RELAY:
             return InitRelay(ComponentAddress);
         break;
+		case COMPONENT_SPDT_switch:
+			return Init_SPDT(ComponentAddress);
+		break;
+		case COMPONENT_DPST_switch:
+			return Init_DPST(ComponentAddress);
+		break;
+		/*case COMPONENT_DPDT_switch:
+			return Init_DPDT(ComponentAddress);
+		break;*/
     }
     return 0;
 }
@@ -81,6 +99,15 @@ double VoltSet(void* ComponentAddress, BOOL SimulationStarted, int ImageType, in
         break;
         case COMPONENT_RELAY:
             return RelayVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
+		case COMPONENT_SPDT_switch:
+			return SPDTVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
+		break;
+		case COMPONENT_DPST_switch:
+			return DPSTVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
+		break;
+		/*case COMPONENT_DPDT_switch:
+			return DPDTVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
+		break;*/
     }
     return Volt;
 }
@@ -95,6 +122,16 @@ void  	SetPinIds(int Index, void *PinName,int ComponentId, void *ComponentAddres
             case  COMPONENT_SWITCH:
                 SetSwitchIds(PinIds, ComponentAddress);
             break;
+			case COMPONENT_SPDT_switch:
+				SetSPDTIds(PinIds, ComponentAddress);
+			break;
+			case COMPONENT_DPST_switch:
+				SetDPSTIds(PinIds, ComponentAddress);
+			break;
+			/*case COMPONENT_DPDT_switch:
+				SetDPDTIds(PinIds, ComponentAddress);
+			break;
+			*/
             case COMPONENT_RELAY:
                 SetRelayIds(PinIds,ComponentAddress);
         }
@@ -125,6 +162,15 @@ int NotifyComponent(void *ComponentAddress, void *PinName, int ComponentId,
             HandleRelayEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
             // return InitRelay(ComponentAddress);
         break;
+		case COMPONENT_SPDT_switch :
+			HandleSPDTEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
+		break;
+		case COMPONENT_DPST_switch:
+			HandleDPSTEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
+		break;
+		/*case COMPONENT_DPDT_switch:
+			HandleDPDTEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
+		break;*/
     }
     // return voltage
     return 0;
