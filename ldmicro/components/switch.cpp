@@ -126,6 +126,7 @@ BOOL SaveSwitchDialog(SwitchStruct* Data)
             ("Incomplete"), ("Warning"), MB_OK | MB_ICONWARNING);
         return FALSE;
     }
+
     if(Edit_GetText(NameTextbox, (LPSTR)&temp, 15) < 1)
     {
         MessageBox(*SwitchDialog,
@@ -185,7 +186,7 @@ int InitSwitch(void* ComponentAddress)
     temp->Volt[0] = V_OPEN;
     temp->Volt[1] = V_OPEN;
 
-    return SWITCH_DISCONNECTED;
+	return SWITCH_DISCONNECTED;
 }
 
 void UpdateValues(SwitchStruct* Switch, void* ComponentAddress)
