@@ -140,8 +140,8 @@ double EqualiseRuntimeVoltageDPDT(void* ComponentAdderss, int index = 0)
 	if (d->NS1)
 	{
 		///If DPDT switch is in state 1 then output12 and output22 will be floating/open
-		d->Volt[out12] = VoltChange(d->PinId[out12], out12, ComponentAdderss, V_OPEN);
-		d->Volt[out22] = VoltChange(d->PinId[out22], out22, ComponentAdderss, V_OPEN);
+		//d->Volt[out12] = VoltChange(d->PinId[out12], out12, ComponentAdderss, V_OPEN);
+		//d->Volt[out22] = VoltChange(d->PinId[out22], out22, ComponentAdderss, V_OPEN);
 
 		///Get voltages at the connected pins
 		double Vin = VoltRequest(d->PinId[in1], ComponentAdderss);
@@ -154,6 +154,12 @@ double EqualiseRuntimeVoltageDPDT(void* ComponentAdderss, int index = 0)
 			d->Volt[out11] = VoltChange(d->PinId[out11], out11, ComponentAdderss, GND);
 			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, GND);
 		}
+		///If Vin is set as open
+		else if (Vin == V_OPEN)
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, Vout);
+		///If Vout is set as open
+		else if (Vout == V_OPEN)
+			d->Volt[out11] = VoltChange(d->PinId[out11], out11, ComponentAdderss, Vin);
 		///If no pin is grounded then all pins are set to the max voltage of the pins
 		else
 		{
@@ -170,6 +176,12 @@ double EqualiseRuntimeVoltageDPDT(void* ComponentAdderss, int index = 0)
 			d->Volt[out21] = VoltChange(d->PinId[out21], out21, ComponentAdderss, GND);
 			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, GND);
 		}
+		///If Vin is set as open
+		else if (Vin == V_OPEN)
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, Vout);
+		///If Vout is set as open
+		else if (Vout == V_OPEN)
+			d->Volt[out21] = VoltChange(d->PinId[out21], out21, ComponentAdderss, Vin);
 		///If no pin is grounded then all pins are set to the max voltage of the pins
 		else
 		{
@@ -181,8 +193,8 @@ double EqualiseRuntimeVoltageDPDT(void* ComponentAdderss, int index = 0)
 	else
 	{
 		///If DPDT switch is in state 2 then output11 and output21 will be floating/open
-		d->Volt[out11] = VoltChange(d->PinId[out11], out11, ComponentAdderss, V_OPEN);
-		d->Volt[out21] = VoltChange(d->PinId[out21], out21, ComponentAdderss, V_OPEN);
+		//d->Volt[out11] = VoltChange(d->PinId[out11], out11, ComponentAdderss, V_OPEN);
+		//d->Volt[out21] = VoltChange(d->PinId[out21], out21, ComponentAdderss, V_OPEN);
 
 		///Get voltages at the connected pins
 		double Vin = VoltRequest(d->PinId[in1], ComponentAdderss);
@@ -195,6 +207,12 @@ double EqualiseRuntimeVoltageDPDT(void* ComponentAdderss, int index = 0)
 			d->Volt[out12] = VoltChange(d->PinId[out12], out12, ComponentAdderss, GND);
 			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, GND);
 		}
+		///If Vin is set as open
+		else if (Vin == V_OPEN)
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, Vout);
+		///If Vout is set as open
+		else if (Vout == V_OPEN)
+			d->Volt[out12] = VoltChange(d->PinId[out12], out12, ComponentAdderss, Vin);
 		///If no pin is grounded then all pins are set to the max voltage of the pins
 		else
 		{
@@ -211,6 +229,12 @@ double EqualiseRuntimeVoltageDPDT(void* ComponentAdderss, int index = 0)
 			d->Volt[out22] = VoltChange(d->PinId[out22], out22, ComponentAdderss, GND);
 			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, GND);
 		}
+		///If Vin is set as open
+		else if (Vin == V_OPEN)
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, Vout);
+		///If Vout is set as open
+		else if (Vout == V_OPEN)
+			d->Volt[out22] = VoltChange(d->PinId[out22], out22, ComponentAdderss, Vin);
 		///If no pin is grounded then all pins are set to the max voltage of the pins
 		else
 		{

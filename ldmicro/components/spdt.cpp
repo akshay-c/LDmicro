@@ -160,7 +160,7 @@ void SpdtSettingsDialog(void* ComponentAddress, void* ImageLocation)
 }
 
 //Dynamically check and equalise the voltage on all pins that are connected to SPDT at runtime
-double EqualiseRuntimeVoltageSPDT(void* ComponentAdderss, int index = 0)
+void EqualiseStaticVoltageSPDT(void* ComponentAdderss)
 {
 	SpdtStruct* s = (SpdtStruct*)ComponentAdderss;
 
@@ -180,6 +180,12 @@ double EqualiseRuntimeVoltageSPDT(void* ComponentAdderss, int index = 0)
 			s->Volt[out1] = VoltChange(s->PinId[out1], out1, ComponentAdderss, GND);
 			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, GND);
 		}
+		///If volt1 is set as open
+		else if (volt1 == V_OPEN)
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, volt2);
+		///If volt2 is set as open
+		else if (volt2 == V_OPEN)
+			s->Volt[out1] = VoltChange(s->PinId[out1], out1, ComponentAdderss, volt1);
 		///If no pin is grounded then all pins are set to the max voltage of the pins
 		else
 		{
@@ -203,6 +209,112 @@ double EqualiseRuntimeVoltageSPDT(void* ComponentAdderss, int index = 0)
 			s->Volt[out2] = VoltChange(s->PinId[out2], out2, ComponentAdderss, GND);
 			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, GND);
 		}
+		///If volt1 is set as open
+		else if (volt1 == V_OPEN)
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, volt2);
+		///If volt2 is set as open
+		else if (volt2 == V_OPEN)
+			s->Volt[out2] = VoltChange(s->PinId[out2], out2, ComponentAdderss, volt1);
+		///If no pin is grounded then all pins are set to the max voltage of the pins (Dynamic event)
+		else
+		{
+			s->Volt[out2] = VoltChange(s->PinId[out2], out2, ComponentAdderss, max(volt1, volt2));
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, max(volt1, volt2));
+		}
+	}
+}
+
+//Dynamically check and equalise the voltage on all pins that are connected to SPDT at runtime
+double EqualiseRuntimeVoltageSPDT(void* ComponentAdderss, int index, double volt)
+{
+	SpdtStruct* s = (SpdtStruct*)ComponentAdderss;
+
+	///Check if input and output 1 are connected
+	if (s->NO1)
+	{
+		if (index == out2)
+			s->Volt[index] = V_OPEN;
+		else
+			///If the input pin is connected to output 1 then output 2 will be open
+			s->Volt[out2] = VoltChange(s->PinId[out2], out2, ComponentAdderss, V_OPEN);
+
+		///Get voltages at the connected pins
+		double volt1;
+		double volt2;
+
+		if (index == in)
+		{
+			volt1 = volt;
+			volt2 = VoltRequest(s->PinId[out1], ComponentAdderss);
+		}
+		else if (index == out1)
+		{
+			volt1 = VoltRequest(s->PinId[in], ComponentAdderss);
+			volt2 = volt;
+		}
+		else
+		{
+			volt1 = VoltRequest(s->PinId[in], ComponentAdderss);
+			volt2 = VoltRequest(s->PinId[out1], ComponentAdderss);
+		}
+
+		///If either pin is grounded then all pins are set to GND
+		if (volt1 == GND || volt2 == GND)
+		{
+			s->Volt[out1] = VoltChange(s->PinId[out1], out1, ComponentAdderss, GND);
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, GND);
+		}
+		///If volt1 is set as open
+		else if (volt1 == V_OPEN)
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, volt2);
+		///If volt2 is set as open
+		else if (volt2 == V_OPEN)
+			s->Volt[out1] = VoltChange(s->PinId[out1], out1, ComponentAdderss, volt1);
+		///If no pin is grounded then all pins are set to the max voltage of the pins
+		else
+		{
+			s->Volt[out1] = VoltChange(s->PinId[out1], out1, ComponentAdderss, max(volt1, volt2));
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, max(volt1, volt2));
+		}
+	}
+	///If input and output 2 are connected
+	else
+	{
+		///If the input pin is connected to output 2 then output 1 will be open
+		s->Volt[out1] = VoltChange(s->PinId[out1], out1, ComponentAdderss, V_OPEN);
+
+		///Get voltages at the connected pins
+		double volt1;
+		double volt2;
+
+		if (index == in)
+		{
+			volt1 = volt;
+			volt2 = VoltRequest(s->PinId[out2], ComponentAdderss);
+		}
+		else if (index == out1)
+		{
+			volt1 = VoltRequest(s->PinId[in], ComponentAdderss);
+			volt2 = volt;
+		}
+		else
+		{
+			volt1 = VoltRequest(s->PinId[in], ComponentAdderss);
+			volt2 = VoltRequest(s->PinId[out2], ComponentAdderss);
+		}
+
+		///If either pin is grounded then all pins are set to GND (Static event)
+		if (volt1 == GND || volt2 == GND)
+		{
+			s->Volt[out2] = VoltChange(s->PinId[out2], out2, ComponentAdderss, GND);
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, GND);
+		}
+		///If volt1 is set as open
+		else if (volt1 == V_OPEN)
+			s->Volt[in] = VoltChange(s->PinId[in], in, ComponentAdderss, volt2);
+		///If volt2 is set as open
+		else if (volt2 == V_OPEN)
+			s->Volt[out2] = VoltChange(s->PinId[out2], out2, ComponentAdderss, volt1);
 		///If no pin is grounded then all pins are set to the max voltage of the pins (Dynamic event)
 		else
 		{
@@ -217,7 +329,7 @@ double EqualiseRuntimeVoltageSPDT(void* ComponentAdderss, int index = 0)
 double SpdtVoltChanged(void * ComponentAddress, BOOL SimulationStarted, int index, double Volt, int Source, void * ImageLocation)
 {
 	if (SimulationStarted)
-		return EqualiseRuntimeVoltageSPDT(ComponentAddress, index);
+		return EqualiseRuntimeVoltageSPDT(ComponentAddress, index, Volt);
 
 	return Volt;
 }
@@ -240,13 +352,13 @@ void HandleSpdtEvent(void * ComponentAddress, int Event, BOOL SimulationStarted,
 		{
 		case EVENT_MOUSE_DOWN:
 			ToggleState(s, ImageLocation);
-			EqualiseRuntimeVoltageSPDT(ComponentAddress);
+			EqualiseStaticVoltageSPDT(ComponentAddress);
 			break;
 		case EVENT_MOUSE_UP:
 			if (!s->latched)
 			{
 				ToggleState(s, ImageLocation);
-				EqualiseRuntimeVoltageSPDT(ComponentAddress);
+				EqualiseStaticVoltageSPDT(ComponentAddress);
 			}
 			break;
 		default:

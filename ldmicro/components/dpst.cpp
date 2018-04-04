@@ -13,6 +13,8 @@
 ///Window handles
 static HWND State1;
 static HWND State2;
+static HWND ModeLatchedDPST;
+static HWND ModeTempDPST;
 HWND* SettingsDialogDPST;
 
 ///Global variables
@@ -24,6 +26,7 @@ int InitDpst(void * ComponentAddress)
 	DpstStruct* d = (DpstStruct*)ComponentAddress;
 	d->image = DPST_1;
 	d->NO = FALSE;
+	d->latched = TRUE;
 	d->Volt[in1] = V_OPEN;
 	d->Volt[in2] = V_OPEN;
 	d->Volt[out1] = V_OPEN;
@@ -43,24 +46,47 @@ void SetDpstIds(int* id, void* ComponentAddress)
 
 void MakeSettingsDialogDPST()
 {
-	HWND InitOut = CreateWindowEx(0, WC_BUTTON, ("Initial output state"),
+	///Switch action mode
+	HWND InitLatched = CreateWindowEx(0, WC_BUTTON, ("Action mode"),
 		WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
 		7, 3, 120, 65, *SettingsDialogDPST, NULL, NULL, NULL);
+	FontNice(InitLatched);
+
+	ModeLatchedDPST = CreateWindowEx(0, WC_BUTTON, ("Latched"),
+		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
+		16, 21, 100, 20, *SettingsDialogDPST, NULL, NULL, NULL);
+	FontNice(ModeLatchedDPST);
+
+	ModeTempDPST = CreateWindowEx(0, WC_BUTTON, ("Temporary"),
+		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
+		16, 41, 100, 20, *SettingsDialogDPST, NULL, NULL, NULL);
+	FontNice(ModeTempDPST);
+	
+	///Switch initial status
+	HWND InitOut = CreateWindowEx(0, WC_BUTTON, ("Initial output state"),
+		WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
+		140, 3, 120, 65, *SettingsDialogDPST, NULL, NULL, NULL);
 	FontNice(InitOut);
 
 	State1 = CreateWindowEx(0, WC_BUTTON, ("State 1"),
 		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
-		16, 21, 100, 20, *SettingsDialogDPST, NULL, NULL, NULL);
+		149, 21, 100, 20, *SettingsDialogDPST, NULL, NULL, NULL);
 	FontNice(State1);
 
 	State2 = CreateWindowEx(0, WC_BUTTON, ("State 2"),
 		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-		16, 41, 100, 20, *SettingsDialogDPST, NULL, NULL, NULL);
+		149, 41, 100, 20, *SettingsDialogDPST, NULL, NULL, NULL);
 	FontNice(State2);
 }
 
 void LoadSettings(DpstStruct* d)
 {
+	
+	if (d->latched)
+		Button_SetCheck(ModeLatchedDPST, BST_CHECKED);
+	else
+		Button_SetCheck(ModeTempDPST, BST_CHECKED);
+	
 	if (!d->NO)
 		Button_SetCheck(State1, BST_CHECKED);
 	else
@@ -68,12 +94,11 @@ void LoadSettings(DpstStruct* d)
 }
 
 BOOL SaveSettings(DpstStruct* d, void* ImageLocation)
-{
-	BOOL NState;
-	if (Button_GetState(State1) == BST_CHECKED)
-		NState = TRUE;
-	else if (Button_GetState(State2) == BST_CHECKED)
-		NState = FALSE;
+{	
+	if (Button_GetState(ModeLatchedDPST) == BST_CHECKED)
+		d->latched = TRUE;
+	else if (Button_GetState(ModeTempDPST) == BST_CHECKED)
+		d->latched = FALSE;
 	else
 	{
 		MessageBox(*SettingsDialogDPST,
@@ -81,9 +106,18 @@ BOOL SaveSettings(DpstStruct* d, void* ImageLocation)
 		return FALSE;
 	}
 
-	d->NO = !NState;
+	if (Button_GetState(State1) == BST_CHECKED)
+		d->NO = FALSE;
+	else if (Button_GetState(State2) == BST_CHECKED)
+		d->NO = TRUE;
+	else
+	{
+		MessageBox(*SettingsDialogDPST,
+			("Incomplete"), ("Warning"), MB_OK | MB_ICONWARNING);
+		return FALSE;
+	}
 
-	if (NState)
+	if (!d->NO)
 		d->image = DPST_1;
 	else
 		d->image = DPST_2;
@@ -136,31 +170,12 @@ double EqualiseRuntimeVoltageDPST(void* ComponentAdderss, int index = 0)
 	if (d->NO)
 	{
 		///If switch is open then all terminals will be floating/open
-		switch (index)
-		{
-		case in1:
-			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, V_OPEN);
-			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, V_OPEN);
-			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, V_OPEN);
-			break;
-		case in2:
-			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, V_OPEN);
-			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, V_OPEN);
-			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, V_OPEN);
-			break;
-		case out1:
-			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, V_OPEN);
-			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, V_OPEN);
-			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, V_OPEN);
-			break;
-		case out2:
-			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, V_OPEN);
-			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, V_OPEN);
-			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, V_OPEN);
-			break;
-		default:
-			break;
-		}
+		/*
+		d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, V_OPEN);
+		d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, V_OPEN);
+		d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, V_OPEN);
+		d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, V_OPEN);
+		*/
 	}
 	///If the switch is connected
 	else
@@ -175,6 +190,12 @@ double EqualiseRuntimeVoltageDPST(void* ComponentAdderss, int index = 0)
 			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, GND);
 			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, GND);
 		}
+		///If Vin is set as open
+		else if (Vin == V_OPEN)
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, Vout);
+		///If Vout is set as open
+		else if (Vout == V_OPEN)
+			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, Vin);
 		///If no pin is grounded then all pins are set to the max voltage of the pins (Dynamic event)
 		else
 		{
@@ -182,8 +203,8 @@ double EqualiseRuntimeVoltageDPST(void* ComponentAdderss, int index = 0)
 			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, max(Vin, Vout));
 		}
 
-		Vin = VoltRequest(d->PinId[in1], ComponentAdderss);
-		Vout = VoltRequest(d->PinId[out1], ComponentAdderss);
+		Vin = VoltRequest(d->PinId[in2], ComponentAdderss);
+		Vout = VoltRequest(d->PinId[out2], ComponentAdderss);
 
 		///Equalise voltage for input 2 output 2 pair
 		///If either pin is grounded then all pins are set to GND (Static event)
@@ -192,6 +213,12 @@ double EqualiseRuntimeVoltageDPST(void* ComponentAdderss, int index = 0)
 			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, GND);
 			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, GND);
 		}
+		///If Vin is set as open
+		else if (Vin == V_OPEN)
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, Vout);
+		///If Vout is set as open
+		else if (Vout == V_OPEN)
+			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, Vin);
 		///If no pin is grounded then all pins are set to the max voltage of the pins (Dynamic event)
 		else
 		{
@@ -219,9 +246,16 @@ void HandleDpstEvent(void * ComponentAddress, int Event, BOOL SimulationStarted,
 	{
 		switch (Event)
 		{
-		case EVENT_MOUSE_CLICK:
+		case EVENT_MOUSE_DOWN:
 			ToggleState(d, ImageLocation);
 			EqualiseRuntimeVoltageDPST(ComponentAddress);
+			break;
+		case EVENT_MOUSE_UP:
+			if (!d->latched)
+			{
+				ToggleState(d, ImageLocation);
+				EqualiseRuntimeVoltageDPST(ComponentAddress);
+			}
 			break;
 		default:
 			break;

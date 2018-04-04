@@ -43,6 +43,7 @@ typedef struct DpstStructTag
 {
 	int id;
 	int image;
+	BOOL latched;      //Whether the swetch is in latch mode or not
 	BOOL NO;          //Whether the inputs and outputs are disconnected (Open)
 	double Volt[4];    // Voltage at Input1, Input2, Output1, Output2 respectively
 	int PinId[4];
