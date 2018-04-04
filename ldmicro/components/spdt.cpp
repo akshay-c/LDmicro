@@ -13,6 +13,8 @@
 ///Window handles
 static HWND StateOut1;
 static HWND StateOut2;
+static HWND ModeLatched;
+static HWND ModeTemp;
 HWND* SettingsDialogSPDT;
  
 ///Global variables
@@ -25,13 +27,13 @@ void SetSpdtIds(int* id, void* ComponentAddress)
 	s->PinId[in] = *id++;
 	s->PinId[out1] = *id++;
 	s->PinId[out2] = *id++;
-
 }
 
 int InitSpdt(void * ComponentAddress)
 {
 	SpdtStruct* s = (SpdtStruct*)ComponentAddress;
 	s->image = SPDT_1;
+	s->latched = TRUE;
 	s->NO1 = TRUE;
 	s->Volt[in] = V_OPEN;
 	s->Volt[out1] = V_OPEN;
@@ -42,24 +44,45 @@ int InitSpdt(void * ComponentAddress)
 
 void MakeSettingsDialogSPDT()
 {
-	HWND InitOut = CreateWindowEx(0, WC_BUTTON, ("Initial output"),
+	///Switch action mode
+	HWND InitLatched = CreateWindowEx(0, WC_BUTTON, ("Action mode"),
 		WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
 		7, 3, 120, 65, *SettingsDialogSPDT, NULL, NULL, NULL);
+	FontNice(InitLatched);
+
+	ModeLatched = CreateWindowEx(0, WC_BUTTON, ("Latched"),
+		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
+		16, 21, 100, 20, *SettingsDialogSPDT, NULL, NULL, NULL);
+	FontNice(ModeLatched);
+
+	ModeTemp = CreateWindowEx(0, WC_BUTTON, ("Temporary"),
+		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
+		16, 41, 100, 20, *SettingsDialogSPDT, NULL, NULL, NULL);
+	FontNice(ModeTemp);
+
+	///Switch initial status
+	HWND InitOut = CreateWindowEx(0, WC_BUTTON, ("Initial output"),
+		WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
+		140, 3, 120, 65, *SettingsDialogSPDT, NULL, NULL, NULL);
 	FontNice(InitOut);
 
 	StateOut1 = CreateWindowEx(0, WC_BUTTON, ("Output 1"),
 		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
-		16, 21, 100, 20, *SettingsDialogSPDT, NULL, NULL, NULL);
+		149, 21, 100, 20, *SettingsDialogSPDT, NULL, NULL, NULL);
 	FontNice(StateOut1);
 
 	StateOut2 = CreateWindowEx(0, WC_BUTTON, ("Output 2"),
 		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-		16, 41, 100, 20, *SettingsDialogSPDT, NULL, NULL, NULL);
+		149, 41, 100, 20, *SettingsDialogSPDT, NULL, NULL, NULL);
 	FontNice(StateOut2);
 }
 
 void LoadSettings(SpdtStruct* s)
 {
+	if (s->latched)
+		Button_SetCheck(ModeLatched, BST_CHECKED);
+	else
+		Button_SetCheck(ModeTemp, BST_CHECKED);
 	if (s->NO1)
 		Button_SetCheck(StateOut1, BST_CHECKED);
 	else
@@ -67,12 +90,11 @@ void LoadSettings(SpdtStruct* s)
 }
 
 BOOL SaveSettings(SpdtStruct* s, void* ImageLocation)
-{
-	BOOL NState1;
-	if (Button_GetState(StateOut1) == BST_CHECKED)
-		NState1 = TRUE;
-	else if (Button_GetState(StateOut2) == BST_CHECKED)
-		NState1 = FALSE;
+{	
+	if (Button_GetState(ModeLatched) == BST_CHECKED)
+		s->latched = TRUE;
+	else if (Button_GetState(ModeTemp) == BST_CHECKED)
+		s->latched = FALSE;
 	else
 	{
 		MessageBox(*SettingsDialogSPDT,
@@ -80,9 +102,19 @@ BOOL SaveSettings(SpdtStruct* s, void* ImageLocation)
 		return FALSE;
 	}
 
-	s->NO1 = NState1;
+	if (Button_GetState(StateOut1) == BST_CHECKED)
+		s->NO1 = TRUE;
+	else if (Button_GetState(StateOut2) == BST_CHECKED)
+		s->NO1 = FALSE;
+	else
+	{
+		MessageBox(*SettingsDialogSPDT,
+			("Incomplete"), ("Warning"), MB_OK | MB_ICONWARNING);
+		return FALSE;
+	}
 
-	if (NState1)
+
+	if (s->NO1)
 		s->image = SPDT_1;
 	else
 		s->image = SPDT_2;
@@ -206,9 +238,16 @@ void HandleSpdtEvent(void * ComponentAddress, int Event, BOOL SimulationStarted,
 	{
 		switch (Event)
 		{
-		case EVENT_MOUSE_CLICK:
+		case EVENT_MOUSE_DOWN:
 			ToggleState(s, ImageLocation);
 			EqualiseRuntimeVoltageSPDT(ComponentAddress);
+			break;
+		case EVENT_MOUSE_UP:
+			if (!s->latched)
+			{
+				ToggleState(s, ImageLocation);
+				EqualiseRuntimeVoltageSPDT(ComponentAddress);
+			}
 			break;
 		default:
 			break;

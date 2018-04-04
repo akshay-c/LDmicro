@@ -33,8 +33,9 @@ typedef struct SpdtStructTag
 {
 	int id;
 	int image;
+	BOOL latched;      //Whether the swetch is in latch mode or not
 	BOOL NO1;          //Whether Output 1 is connected
-	double Volt[3];    // Voltage at Input, Output1, Output2 respectively
+	double Volt[3];    //Voltage at Input, Output1, Output2 respectively
 	int PinId[3];
 }SpdtStruct;
 
