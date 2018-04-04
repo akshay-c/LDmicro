@@ -13,6 +13,8 @@
 ///Window handles
 static HWND DPDTState1;
 static HWND DPDTState2;
+static HWND ModeLatchedDPDT;
+static HWND ModeTempDPDT;
 HWND* SettingsDialogDPDT;
 
 ///Global variables
@@ -24,6 +26,7 @@ int InitDpdt(void * ComponentAddress)
 	DpdtStruct* d = (DpdtStruct*)ComponentAddress;
 	d->image = DPDT_1;
 	d->NS1 = TRUE;
+	d->latched = TRUE;
 	d->Volt[in1] = V_OPEN;
 	d->Volt[in2] = V_OPEN;
 	d->Volt[out11] = V_OPEN;
@@ -47,24 +50,45 @@ void SetDpdtIds(int* id, void* ComponentAddress)
 
 void MakeSettingsDialogDPDT()
 {
-	HWND InitOut = CreateWindowEx(0, WC_BUTTON, ("Initial output state"),
+	///Switch action mode
+	HWND InitLatched = CreateWindowEx(0, WC_BUTTON, ("Action mode"),
 		WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
 		7, 3, 120, 65, *SettingsDialogDPDT, NULL, NULL, NULL);
+	FontNice(InitLatched);
+
+	ModeLatchedDPDT = CreateWindowEx(0, WC_BUTTON, ("Latched"),
+		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
+		16, 21, 100, 20, *SettingsDialogDPDT, NULL, NULL, NULL);
+	FontNice(ModeLatchedDPDT);
+
+	ModeTempDPDT = CreateWindowEx(0, WC_BUTTON, ("Temporary"),
+		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
+		16, 41, 100, 20, *SettingsDialogDPDT, NULL, NULL, NULL);
+	FontNice(ModeTempDPDT);
+
+	///Switch initial status
+	HWND InitOut = CreateWindowEx(0, WC_BUTTON, ("Initial output state"),
+		WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
+		140, 3, 120, 65, *SettingsDialogDPDT, NULL, NULL, NULL);
 	FontNice(InitOut);
 
 	DPDTState1 = CreateWindowEx(0, WC_BUTTON, ("State 1"),
 		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
-		16, 21, 100, 20, *SettingsDialogDPDT, NULL, NULL, NULL);
+		149, 21, 100, 20, *SettingsDialogDPDT, NULL, NULL, NULL);
 	FontNice(DPDTState1);
 
 	DPDTState2 = CreateWindowEx(0, WC_BUTTON, ("State 2"),
 		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-		16, 41, 100, 20, *SettingsDialogDPDT, NULL, NULL, NULL);
+		149, 41, 100, 20, *SettingsDialogDPDT, NULL, NULL, NULL);
 	FontNice(DPDTState2);
 }
 
 void LoadSettings(DpdtStruct* d)
 {
+	if (d->latched)
+		Button_SetCheck(ModeLatchedDPDT, BST_CHECKED);
+	else
+		Button_SetCheck(ModeTempDPDT, BST_CHECKED);
 	if (d->NS1)
 		Button_SetCheck(DPDTState1, BST_CHECKED);
 	else
@@ -73,11 +97,15 @@ void LoadSettings(DpdtStruct* d)
 
 BOOL SaveSettings(DpdtStruct* d, void* ImageLocation)
 {
-	BOOL NState;
+	if (Button_GetState(ModeLatchedDPDT) == BST_CHECKED)
+		d->latched = TRUE;
+	else
+		d->latched = FALSE;
+
 	if (Button_GetState(DPDTState1) == BST_CHECKED)
-		NState = TRUE;
+		d->NS1 = TRUE;
 	else if (Button_GetState(DPDTState2) == BST_CHECKED)
-		NState = FALSE;
+		d->NS1 = FALSE;
 	else
 	{
 		MessageBox(*SettingsDialogDPDT,
@@ -85,9 +113,7 @@ BOOL SaveSettings(DpdtStruct* d, void* ImageLocation)
 		return FALSE;
 	}
 
-	d->NS1 = NState;
-
-	if (NState)
+	if (d->NS1)
 		d->image = DPDT_1;
 	else
 		d->image = DPDT_2;
@@ -464,9 +490,16 @@ void HandleDpdtEvent(void * ComponentAddress, int Event, BOOL SimulationStarted,
 	{
 		switch (Event)
 		{
-		case EVENT_MOUSE_CLICK:
+		case EVENT_MOUSE_DOWN:
 			ToggleState(d, ImageLocation);
 			EqualiseStaticVoltageDPDT(ComponentAddress);
+			break;
+		case EVENT_MOUSE_UP:
+			if (!d->latched)
+			{
+				ToggleState(d, ImageLocation);
+				EqualiseStaticVoltageDPDT(ComponentAddress);
+			}
 			break;
 		default:
 			break;
