@@ -162,7 +162,7 @@ void DpstSettingsDialog(void* ComponentAddress, void* ImageLocation)
 }
 
 //Dynamically check and equalise the voltage on all pins that are connected to DPST at runtime
-double EqualiseRuntimeVoltageDPST(void* ComponentAdderss, int index = 0)
+double EqualiseRuntimeVoltageDPST(void* ComponentAdderss, int index, double volt)
 {
 	DpstStruct* d = (DpstStruct*)ComponentAdderss;
 	
@@ -170,12 +170,137 @@ double EqualiseRuntimeVoltageDPST(void* ComponentAdderss, int index = 0)
 	if (d->NO)
 	{
 		///If switch is open then all terminals will be floating/open
-		/*
+		switch (index)
+		{
+		case in1:
+			d->Volt[in1] = V_OPEN;
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, V_OPEN);
+			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, V_OPEN);
+			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, V_OPEN);
+			break;
+		case in2:
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, V_OPEN);
+			d->Volt[in2] = V_OPEN;
+			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, V_OPEN);
+			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, V_OPEN);
+		case out1:
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, V_OPEN);
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, V_OPEN);
+			d->Volt[out1] = V_OPEN;
+			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, V_OPEN);
+			break;
+		case out2:
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, V_OPEN);
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, V_OPEN);
+			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, V_OPEN);
+			d->Volt[out2] = V_OPEN;
+			break;
+		default:
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, V_OPEN);
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, V_OPEN);
+			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, V_OPEN);
+			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, V_OPEN);
+			break;
+		}
+	}
+	///If the switch is connected
+	else
+	{
+		double Vin;
+		double Vout;
+
+		///Get voltages at the connected pins
+		if (index == in1)
+		{
+			Vin = volt;
+			Vout = VoltRequest(d->PinId[out1], ComponentAdderss);
+		}
+		else if (index == out1)
+		{
+			Vin = VoltRequest(d->PinId[in1], ComponentAdderss);
+			Vout = volt;
+		}
+		else
+		{
+			Vin = VoltRequest(d->PinId[in1], ComponentAdderss);
+			Vout = VoltRequest(d->PinId[out1], ComponentAdderss);
+		}
+
+		///Equalise voltage for input 1 output 1 pair
+		///If either pin is grounded then all pins are set to GND (Static event)
+		if (Vin == GND || Vout == GND)
+		{
+			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, GND);
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, GND);
+		}
+		///If Vin is set as open
+		else if (Vin == V_OPEN)
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, Vout);
+		///If Vout is set as open
+		else if (Vout == V_OPEN)
+			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, Vin);
+		///If no pin is grounded then all pins are set to the max voltage of the pins (Dynamic event)
+		else
+		{
+			d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, max(Vin, Vout));
+			d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, max(Vin, Vout));
+		}
+
+		///Get voltages at the connected pins
+		if (index == in2)
+		{
+			Vin = volt;
+			Vout = VoltRequest(d->PinId[out2], ComponentAdderss);
+		}
+		else if (index == out2)
+		{
+			Vin = VoltRequest(d->PinId[in2], ComponentAdderss);
+			Vout = volt;
+		}
+		else
+		{
+			Vin = VoltRequest(d->PinId[in2], ComponentAdderss);
+			Vout = VoltRequest(d->PinId[out2], ComponentAdderss);
+		}
+
+		///Equalise voltage for input 2 output 2 pair
+		///If either pin is grounded then all pins are set to GND (Static event)
+		if (Vin == GND || Vout == GND)
+		{
+			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, GND);
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, GND);
+		}
+		///If Vin is set as open
+		else if (Vin == V_OPEN)
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, Vout);
+		///If Vout is set as open
+		else if (Vout == V_OPEN)
+			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, Vin);
+		///If no pin is grounded then all pins are set to the max voltage of the pins (Dynamic event)
+		else
+		{
+			d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, max(Vin, Vout));
+			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, max(Vin, Vout));
+		}
+	}
+
+	return d->Volt[index];
+}
+
+//Perform a static check and equalise the voltage on all pins that are connected to DPST at runtime
+void EqualiseStaticVoltageDPST(void* ComponentAdderss)
+{
+	DpstStruct* d = (DpstStruct*)ComponentAdderss;
+
+	///Check if the switch is open	
+	if (d->NO)
+	{
+		///If switch is open then all terminals will be floating/open
 		d->Volt[in1] = VoltChange(d->PinId[in1], in1, ComponentAdderss, V_OPEN);
 		d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, V_OPEN);
 		d->Volt[out1] = VoltChange(d->PinId[out1], out1, ComponentAdderss, V_OPEN);
 		d->Volt[out2] = VoltChange(d->PinId[out2], out2, ComponentAdderss, V_OPEN);
-		*/
+
 	}
 	///If the switch is connected
 	else
@@ -226,8 +351,6 @@ double EqualiseRuntimeVoltageDPST(void* ComponentAdderss, int index = 0)
 			d->Volt[in2] = VoltChange(d->PinId[in2], in2, ComponentAdderss, max(Vin, Vout));
 		}
 	}
-
-	return d->Volt[index];
 }
 
 void ToggleState(DpstStruct* d, void* ImageLocation)
@@ -248,13 +371,13 @@ void HandleDpstEvent(void * ComponentAddress, int Event, BOOL SimulationStarted,
 		{
 		case EVENT_MOUSE_DOWN:
 			ToggleState(d, ImageLocation);
-			EqualiseRuntimeVoltageDPST(ComponentAddress);
+			EqualiseStaticVoltageDPST(ComponentAddress);
 			break;
 		case EVENT_MOUSE_UP:
 			if (!d->latched)
 			{
 				ToggleState(d, ImageLocation);
-				EqualiseRuntimeVoltageDPST(ComponentAddress);
+				EqualiseStaticVoltageDPST(ComponentAddress);
 			}
 			break;
 		default:
@@ -277,7 +400,7 @@ void HandleDpstEvent(void * ComponentAddress, int Event, BOOL SimulationStarted,
 double DpstVoltChanged(void * ComponentAddress, BOOL SimulationStarted, int index, double Volt, int Source, void * ImageLocation)
 {
 	if (SimulationStarted)
-		return EqualiseRuntimeVoltageDPST(ComponentAddress, index);
+		return EqualiseRuntimeVoltageDPST(ComponentAddress, index, Volt);
 	
 	return Volt;
 }

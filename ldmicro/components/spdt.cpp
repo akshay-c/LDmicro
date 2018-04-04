@@ -159,7 +159,7 @@ void SpdtSettingsDialog(void* ComponentAddress, void* ImageLocation)
 
 }
 
-//Dynamically check and equalise the voltage on all pins that are connected to SPDT at runtime
+//Perform a static check and equalise the voltage on all pins that are connected to SPDT at runtime
 void EqualiseStaticVoltageSPDT(void* ComponentAdderss)
 {
 	SpdtStruct* s = (SpdtStruct*)ComponentAdderss;
@@ -232,16 +232,16 @@ double EqualiseRuntimeVoltageSPDT(void* ComponentAdderss, int index, double volt
 	///Check if input and output 1 are connected
 	if (s->NO1)
 	{
+		///If the input pin is connected to output 1 then output 2 will be open
 		if (index == out2)
-			s->Volt[index] = V_OPEN;
+			s->Volt[out2] = V_OPEN;
 		else
-			///If the input pin is connected to output 1 then output 2 will be open
 			s->Volt[out2] = VoltChange(s->PinId[out2], out2, ComponentAdderss, V_OPEN);
 
-		///Get voltages at the connected pins
 		double volt1;
 		double volt2;
 
+		///Get voltages at the connected pins
 		if (index == in)
 		{
 			volt1 = volt;
@@ -283,10 +283,10 @@ double EqualiseRuntimeVoltageSPDT(void* ComponentAdderss, int index, double volt
 		///If the input pin is connected to output 2 then output 1 will be open
 		s->Volt[out1] = VoltChange(s->PinId[out1], out1, ComponentAdderss, V_OPEN);
 
-		///Get voltages at the connected pins
 		double volt1;
 		double volt2;
 
+		///Get voltages at the connected pins
 		if (index == in)
 		{
 			volt1 = volt;
