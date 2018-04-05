@@ -57,10 +57,10 @@ void DPSTLoadState(DPSTStruct* Data)
 	{
 		Button_SetCheck(LatchedRadio_dpst, BST_CHECKED);
 	}
-	/*else
+	else
 	{
 		Button_SetCheck(TemporaryRadio_dpst, BST_CHECKED);
-	}*/
+	}
 	if (Data->init_pos)
 	{
 		Button_SetCheck(ClosedRadio_dpst, BST_CHECKED);
@@ -78,10 +78,10 @@ BOOL SaveDPSTDialog(DPSTStruct* Data)
 	{
 		latched = TRUE;
 	}
-	/*else if (Button_GetState(TemporaryRadio_dpst) == BST_CHECKED)
+	else if (Button_GetState(TemporaryRadio_dpst) == BST_CHECKED)
 	{
 		latched = FALSE;
-	}*/
+	}
 	else
 	{
 		MessageBox(*DPSTDialog,
@@ -176,7 +176,7 @@ void DPSTUpdateValues(DPSTStruct* dpstData, void* ComponentAddress)
 		temp->volt[3] = VoltChange(temp->pinId[3], 3, ComponentAddress, V_OPEN);
 	}
 	// Closed condition
-	else if (!temp->open) {
+	else {
 		/*if ((v0 > v1) && (v2 > v3))
 		{
 			temp->volt[1] = VoltChange(temp->pinId[1], 1, dpstData, v0);
@@ -204,14 +204,14 @@ void DPSTUpdateValues(DPSTStruct* dpstData, void* ComponentAddress)
 					temp->volt[2] = VoltChange(temp->pinId[2], 2, ComponentAddress, v3);
 				}
 			}
-			else if (v1 == V_OPEN && v3 == V_OPEN) {
+			/*else if (v1 == V_OPEN && v3 == V_OPEN) {
 				temp->volt[1] = VoltChange(temp->pinId[1], 1, ComponentAddress, v0);
 				temp->volt[3] = VoltChange(temp->pinId[3], 3, ComponentAddress, v2);
 			}
 			else if (v0 == V_OPEN && v2 == V_OPEN) {
 				temp->volt[0] = VoltChange(temp->pinId[0], 0, ComponentAddress, v1);
 				temp->volt[2] = VoltChange(temp->pinId[2], 2, ComponentAddress, v3);
-			}
+			}*/
 		}
 		else {
 			temp->volt[0] = VoltChange(temp->pinId[0], 0, ComponentAddress, GND);
@@ -242,7 +242,43 @@ void HandleDPSTEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
 			SetImage(!temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
 				ImageLocation);
 			RefreshImages();
+
+			// Updating the values according to the click.
 			DPSTUpdateValues(temp, ComponentAddress);
+			break;
+
+		case EVENT_MOUSE_UP:
+			if (!temp->latched)
+			{
+				temp->open = temp->init_pos;
+				//temp->open = !temp->open;
+			/*else
+			{
+				temp->open = temp->init_pos;
+			}*/
+			// Setting the image according to the click.
+				SetImage(!temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
+					ImageLocation);
+				RefreshImages();
+			}
+
+			// Updating the values according to the click.
+			DPSTUpdateValues(temp, ComponentAddress);
+			break;
+
+		case EVENT_MOUSE_DOWN:
+			if (!temp->latched)
+			{
+				temp->open = !temp->init_pos;
+
+				// Updating the values according to the click.
+				DPSTUpdateValues(temp, ComponentAddress);
+
+				// Setting the image according to the click.
+				SetImage(!temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
+					ImageLocation);
+				RefreshImages();
+			}
 			break;
 		}
 	}

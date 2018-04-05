@@ -5,7 +5,7 @@
 #include <Windowsx.h>
 
 #include "componentstructs.h"
-//#include "componentfunctions.h"
+#include "componentfunctions.h"
 #include "componentimages.h"
 #include "components.h"
 
@@ -18,7 +18,7 @@ static HWND InNameTextbox_dpdt;
 static HWND OutNameTextbox_dpdt;
 HWND* DPDTDialog;
 
-void DPDTStateChanged(SPDTStruct* SwitchData, void* ImageLocation);
+void DPDTStateChanged(DPDTStruct* dpdtData, void* ImageLocation);
 void MakeSwitchControls()
 {
 	HWND ActionGrouper = CreateWindowEx(0, WC_BUTTON, ("Action"),
