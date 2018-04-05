@@ -9,6 +9,7 @@
 #include "componentimages.h"
 #include "components.h"
 
+// Declaring the required components in UI.
 static HWND TemporaryRadio_spdt;
 static HWND LatchedRadio_spdt;
 static HWND ClosedRadio_1_spdt;
@@ -18,6 +19,7 @@ static HWND InNameTextbox_spdt;
 static HWND OutNameTextbox_spdt;
 HWND* SPDTDialog;
 
+// UI for the SPDT switch.
 void MakeSPDTControls()
 {
 	HWND ActionGrouper = CreateWindowEx(0, WC_BUTTON, ("Action"),
@@ -116,6 +118,20 @@ BOOL SaveSPDTDialog(SPDTStruct* Data)
 	return TRUE;
 }
 
+// Initializing the required variables.
+int Init_SPDT(void * ComponentAddress)
+{
+	SPDTStruct* temp = (SPDTStruct*)ComponentAddress;
+	temp->image = SPDT_switch_connected_1;
+	temp->latch_1 = TRUE;							// Connection between pin 1 and common pin
+	temp->latched = TRUE;							// Varibale for latching action
+	temp->init_pos = TRUE;
+	temp->volt[0] = V_OPEN;
+	temp->volt[1] = V_OPEN;
+	temp->volt[2] = V_OPEN;
+	return SPDT_switch_connected_1;
+}
+
 void ShowSPDTDialog(void* ComponentAddress)
 {
 	SPDTStruct* Data = (SPDTStruct*)ComponentAddress;
@@ -149,6 +165,7 @@ void SPDTUpdateValues(SPDTStruct* spdt, void* ComponentAddress)
 	double v0, v1, v2;
 	if (temp->latch_1 == TRUE) 
 	{
+		// Fetching the voltages at each pin.
 		v0 = VoltRequest(temp->pinId[0], ComponentAddress);
 		v1 = VoltRequest(temp->pinId[1], ComponentAddress);
 
@@ -278,6 +295,8 @@ double SPDTVoltChanged(void* spdtData, BOOL SimulationStarted, int Index,
 	{
 		double v0, v1, v2;
 		if (temp->latch_1 == TRUE) {
+
+			// Fetching the voltages at each pin.
 			v0 = VoltRequest(temp->pinId[0], spdtData);
 			v1 = VoltRequest(temp->pinId[1], spdtData);
 
@@ -344,19 +363,6 @@ double SPDTVoltChanged(void* spdtData, BOOL SimulationStarted, int Index,
 		}
 		return 0;
 	}
-}
-
-int Init_SPDT(void * ComponentAddress)
-{
-	SPDTStruct* temp = (SPDTStruct*)ComponentAddress;
-	temp->image = SPDT_switch_connected_1;
-	temp->latch_1 = TRUE;
-	temp->latched = TRUE;
-	temp->init_pos = TRUE;
-	temp->volt[0] = V_OPEN;
-	temp->volt[1] = V_OPEN;
-	temp->volt[2] = V_OPEN;
-	return SPDT_switch_connected_1;
 }
 
 void SetSPDTIds(int *id, void * ComponentAddress)

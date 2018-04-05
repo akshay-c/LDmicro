@@ -164,10 +164,14 @@ void DPSTUpdateValues(DPSTStruct* dpstData, void* ComponentAddress)
 {
 	DPSTStruct* temp = (DPSTStruct*)dpstData;
 	double v0, v1, v2, v3;
+
+	// Fetching the voltages at each pin.
 	v0 = VoltRequest(temp->pinId[0], ComponentAddress);
 	v1 = VoltRequest(temp->pinId[1], ComponentAddress);
 	v2 = VoltRequest(temp->pinId[2], ComponentAddress);
 	v3 = VoltRequest(temp->pinId[3], ComponentAddress);
+
+	// Updating the voltages according to priority order mentioned in the documentation.
 	if (temp->open)				// Open condition.
 	{
 		temp->volt[0] = VoltChange(temp->pinId[0], 0, ComponentAddress, V_OPEN);
@@ -177,20 +181,6 @@ void DPSTUpdateValues(DPSTStruct* dpstData, void* ComponentAddress)
 	}
 	// Closed condition
 	else {
-		/*if ((v0 > v1) && (v2 > v3))
-		{
-			temp->volt[1] = VoltChange(temp->pinId[1], 1, dpstData, v0);
-			temp->volt[3] = VoltChange(temp->pinId[3], 3, dpstData, v2);
-			temp->volt[2] = VoltChange(temp->pinId[2], 2, dpstData, V_OPEN);
-			temp->volt[0] = VoltChange(temp->pinId[0], 0, dpstData, V_OPEN);
-		}
-		else
-		{
-			temp->volt[0] = VoltChange(temp->pinId[0], 0, dpstData, v1);
-			temp->volt[2] = VoltChange(temp->pinId[2], 2, dpstData, v3);
-			temp->volt[3] = VoltChange(temp->pinId[3], 3, dpstData, V_OPEN);
-			temp->volt[1] = VoltChange(temp->pinId[1], 1, dpstData, V_OPEN);
-		}*/
 		if ((v0 != GND && v1 != GND) && (v2 != GND && v3 != GND)) {
 			if ((v0 != V_OPEN && v1 != V_OPEN) && (v2 != V_OPEN && v3 != V_OPEN)) {
 				if ((v0 > v1) && (v2 > v3))
@@ -204,14 +194,6 @@ void DPSTUpdateValues(DPSTStruct* dpstData, void* ComponentAddress)
 					temp->volt[2] = VoltChange(temp->pinId[2], 2, ComponentAddress, v3);
 				}
 			}
-			/*else if (v1 == V_OPEN && v3 == V_OPEN) {
-				temp->volt[1] = VoltChange(temp->pinId[1], 1, ComponentAddress, v0);
-				temp->volt[3] = VoltChange(temp->pinId[3], 3, ComponentAddress, v2);
-			}
-			else if (v0 == V_OPEN && v2 == V_OPEN) {
-				temp->volt[0] = VoltChange(temp->pinId[0], 0, ComponentAddress, v1);
-				temp->volt[2] = VoltChange(temp->pinId[2], 2, ComponentAddress, v3);
-			}*/
 		}
 		else {
 			temp->volt[0] = VoltChange(temp->pinId[0], 0, ComponentAddress, GND);
@@ -228,71 +210,23 @@ void HandleDPSTEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
 	DPSTStruct *temp = (DPSTStruct*)ComponentAddress;
 	if (SimulationStarted)
 	{
-		switch (Event) {
-		case EVENT_MOUSE_UP:
-			if (temp->latched)
-			{
+		if (temp->latched)
+		{
+			switch (Event) {
+			case EVENT_MOUSE_UP:
 				temp->open = !temp->open;
-			}
-			else
-			{
-				temp->open = temp->init_pos; 
-			}
-			SetImage(temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
-				ImageLocation);
-			RefreshImages();
-			DPSTUpdateValues(temp, ComponentAddress);
-			break;
-		case EVENT_MOUSE_DOWN:
-			if (!temp->latched)
-			{
-				temp->open = !temp->init_pos;
 				SetImage(temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
 					ImageLocation);
 				RefreshImages();
 				DPSTUpdateValues(temp, ComponentAddress);
+				break;
 			}
-			break;
-		/*case EVENT_MOUSE_CLICK:
-			if (temp->latched)
+		}
+		else
+		{
+			switch (Event)
 			{
-				temp->open = !temp->open;
-			}
-			else
-			{
-				temp->open = temp->init_pos;
-			}
-			// Setting the image according to the click.
-			SetImage(!temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
-				ImageLocation);
-			RefreshImages();
-
-			// Updating the values according to the click.
-			DPSTUpdateValues(temp, ComponentAddress);
-			break;
-
-		case EVENT_MOUSE_UP:
-			if (!temp->latched)
-			{
-				temp->open = temp->init_pos;
-				//temp->open = !temp->open;
-			/*else
-			{
-				temp->open = temp->init_pos;
-			} //End multicomment of else
-			// Setting the image according to the click.
-				SetImage(!temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
-					ImageLocation);
-				RefreshImages();
-			}
-
-			// Updating the values according to the click.
-			DPSTUpdateValues(temp, ComponentAddress);
-			break;
-
-		case EVENT_MOUSE_DOWN:
-			if (!temp->latched)
-			{
+			case EVENT_MOUSE_DOWN:
 				temp->open = !temp->init_pos;
 
 				// Updating the values according to the click.
@@ -302,8 +236,20 @@ void HandleDPSTEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
 				SetImage(!temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
 					ImageLocation);
 				RefreshImages();
+				break;
+
+			case EVENT_MOUSE_UP:
+				temp->open = temp->init_pos;
+
+				// Setting the image according to the click.
+				SetImage(!temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
+					ImageLocation);
+				RefreshImages();
+
+				// Updating the values according to the click.
+				DPSTUpdateValues(temp, ComponentAddress);
+				break;
 			}
-			break;*/
 		}
 	}
 	else
@@ -331,6 +277,8 @@ double DPSTVoltChanged(void* dpstData, BOOL SimulationStarted, int Index,
 		v1 = VoltRequest(temp->pinId[1], dpstData);
 		v2 = VoltRequest(temp->pinId[2], dpstData);
 		v3 = VoltRequest(temp->pinId[3], dpstData);
+		
+		// Changing the voltages according to the priority order mentioned.
 		if (temp->open)				// Open condition.
 		{
 			temp->volt[0] = VoltChange(temp->pinId[0], 0, dpstData, V_OPEN);

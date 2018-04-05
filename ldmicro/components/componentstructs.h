@@ -35,8 +35,8 @@ typedef struct SPDT_switch_struct_Tag
 	int image;                         // Image of the pin
 	int pinId[3];                      // Pin IDs to store 3 pins
 	BOOL init_pos;                     // Initial open/closed position
-	BOOL latch_1;                      // Latched to the output pin 1
-	BOOL latched;                      // Latching/temporary action
+	BOOL latch_1;                      // Connection between pin 1 and common pin
+	BOOL latched;                      // Varibale for latching/temporary action
 	double volt[3];                    // Voltage at each pin
 	char name[15];
 }SPDTStruct;
