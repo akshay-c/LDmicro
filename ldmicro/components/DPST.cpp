@@ -229,7 +229,31 @@ void HandleDPSTEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
 	if (SimulationStarted)
 	{
 		switch (Event) {
-		case EVENT_MOUSE_CLICK:
+		case EVENT_MOUSE_UP:
+			if (temp->latched)
+			{
+				temp->open = !temp->open;
+			}
+			else
+			{
+				temp->open = temp->init_pos; 
+			}
+			SetImage(temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
+				ImageLocation);
+			RefreshImages();
+			DPSTUpdateValues(temp, ComponentAddress);
+			break;
+		case EVENT_MOUSE_DOWN:
+			if (!temp->latched)
+			{
+				temp->open = !temp->init_pos;
+				SetImage(temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
+					ImageLocation);
+				RefreshImages();
+				DPSTUpdateValues(temp, ComponentAddress);
+			}
+			break;
+		/*case EVENT_MOUSE_CLICK:
 			if (temp->latched)
 			{
 				temp->open = !temp->open;
@@ -255,7 +279,7 @@ void HandleDPSTEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
 			/*else
 			{
 				temp->open = temp->init_pos;
-			}*/
+			} //End multicomment of else
 			// Setting the image according to the click.
 				SetImage(!temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
 					ImageLocation);
@@ -279,7 +303,7 @@ void HandleDPSTEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
 					ImageLocation);
 				RefreshImages();
 			}
-			break;
+			break;*/
 		}
 	}
 	else
