@@ -330,7 +330,7 @@ double SPDTVoltChanged(void* spdtData, BOOL SimulationStarted, int Index,
 					}
 					else {
 						//Voltage = VoltChange(temp->pinId[Index + 1], Index + 1, spdtData, Volt);
-						temp->volt[0] = VoltChange(temp->pinId[0], 0, spdtData, v1);
+						temp->volt[1] = VoltChange(temp->pinId[1], 1, spdtData, v0);
 						return (temp->volt[Index]);
 					}
 				}

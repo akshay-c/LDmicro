@@ -47,7 +47,6 @@ typedef struct DPST_switch_struct_Tag
 	int image;                         // Image of the pin
 	int pinId[4];                      // Pin IDs to store 4 pins
 	BOOL init_pos;                     // Initial open/closed position
-	BOOL closed;                       // Closed
 	BOOL open;                         // Open
 	double volt[4];                    // Voltage at each pin
 	BOOL latched;

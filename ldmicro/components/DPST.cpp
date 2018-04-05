@@ -9,16 +9,15 @@
 #include "componentimages.h"
 #include "components.h"
 
-//static HWND TemporaryRadio;
+// Declaring the required components in UI.
+static HWND TemporaryRadio_dpst;
 static HWND LatchedRadio_dpst;
 static HWND ClosedRadio_dpst;
-//static HWND ClosedRadio_2_dpst;
 static HWND OpenRadio_dpst;
-//static HWND NameTextbox_dpst;
-//static HWND InNameTextbox_dpst;
 static HWND OutNameTextbox_dpst;
 HWND* DPSTDialog;
 
+// UI for the DPST switch.
 void MakeDPSTControls()
 {
 	HWND ActionGrouper = CreateWindowEx(0, WC_BUTTON, ("Action"),
@@ -30,6 +29,11 @@ void MakeDPSTControls()
 		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
 		16, 21, 100, 20, *DPSTDialog, NULL, NULL, NULL);
 	FontNice(LatchedRadio_dpst);
+
+	TemporaryRadio_dpst = CreateWindowEx(0, WC_BUTTON, ("Temporary"),
+		WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
+		16, 41, 100, 20, *DPSTDialog, NULL, NULL, NULL);
+	FontNice(TemporaryRadio_dpst);
 
 	HWND PositionGrouper = CreateWindowEx(0, WC_BUTTON, ("Position"),
 		WS_CHILD | BS_GROUPBOX | WS_VISIBLE,
@@ -53,7 +57,11 @@ void DPSTLoadState(DPSTStruct* Data)
 	{
 		Button_SetCheck(LatchedRadio_dpst, BST_CHECKED);
 	}
-	if (!Data->init_pos)
+	/*else
+	{
+		Button_SetCheck(TemporaryRadio_dpst, BST_CHECKED);
+	}*/
+	if (Data->init_pos)
 	{
 		Button_SetCheck(ClosedRadio_dpst, BST_CHECKED);
 	}
@@ -61,7 +69,6 @@ void DPSTLoadState(DPSTStruct* Data)
 	{
 		Button_SetCheck(OpenRadio_dpst, BST_CHECKED);
 	}
-	//Edit_SetText(NameTextbox_spdt, Data->Name);
 }
 
 BOOL SaveDPSTDialog(DPSTStruct* Data)
@@ -70,8 +77,11 @@ BOOL SaveDPSTDialog(DPSTStruct* Data)
 	if (Button_GetState(LatchedRadio_dpst) == BST_CHECKED)
 	{
 		latched = TRUE;
-
 	}
+	/*else if (Button_GetState(TemporaryRadio_dpst) == BST_CHECKED)
+	{
+		latched = FALSE;
+	}*/
 	else
 	{
 		MessageBox(*DPSTDialog,
@@ -82,7 +92,6 @@ BOOL SaveDPSTDialog(DPSTStruct* Data)
 	if (Button_GetState(ClosedRadio_dpst) == BST_CHECKED)
 	{
 		init_pos = TRUE;
-
 	}
 	else if (Button_GetState(OpenRadio_dpst) == BST_CHECKED)
 	{
@@ -96,14 +105,13 @@ BOOL SaveDPSTDialog(DPSTStruct* Data)
 	}
 	Data->latched = latched;
 	Data->init_pos = init_pos;
-	//Data->Open = NOpen;
 	if (init_pos)
 	{
-		Data->image = DPST_switch_disconnected_1;
+		Data->image = DPST_switch_connected_1;
 	}
 	else
 	{
-		Data->image = DPST_switch_connected_1;
+		Data->image = DPST_switch_disconnected_1;
 	}
 	return TRUE;
 }
@@ -135,11 +143,12 @@ void ShowDPSTDialog(void* ComponentAddress)
 	DestroyWindow(*DPSTDialog);
 }
 
+// Initializing the required variables.
 int Init_DPST(void* ComponentAddress)
 {
 	DPSTStruct* temp = (DPSTStruct*)ComponentAddress;
 	temp->image = DPST_switch_disconnected_1;
-	temp->latched = TRUE;
+	temp->latched = TRUE;                   // Varibale for latching action
 	temp->open = TRUE;
 	temp->init_pos = TRUE;
 	temp->volt[0] = V_OPEN;
@@ -150,41 +159,92 @@ int Init_DPST(void* ComponentAddress)
 	return DPST_switch_disconnected_1;
 }
 
+// Updating the voltages at each pin.
+void DPSTUpdateValues(DPSTStruct* dpstData, void* ComponentAddress)
+{
+	DPSTStruct* temp = (DPSTStruct*)dpstData;
+	double v0, v1, v2, v3;
+	v0 = VoltRequest(temp->pinId[0], ComponentAddress);
+	v1 = VoltRequest(temp->pinId[1], ComponentAddress);
+	v2 = VoltRequest(temp->pinId[2], ComponentAddress);
+	v3 = VoltRequest(temp->pinId[3], ComponentAddress);
+	if (temp->open)				// Open condition.
+	{
+		temp->volt[0] = VoltChange(temp->pinId[0], 0, ComponentAddress, V_OPEN);
+		temp->volt[1] = VoltChange(temp->pinId[1], 1, ComponentAddress, V_OPEN);
+		temp->volt[2] = VoltChange(temp->pinId[2], 2, ComponentAddress, V_OPEN);
+		temp->volt[3] = VoltChange(temp->pinId[3], 3, ComponentAddress, V_OPEN);
+	}
+	// Closed condition
+	else if (!temp->open) {
+		/*if ((v0 > v1) && (v2 > v3))
+		{
+			temp->volt[1] = VoltChange(temp->pinId[1], 1, dpstData, v0);
+			temp->volt[3] = VoltChange(temp->pinId[3], 3, dpstData, v2);
+			temp->volt[2] = VoltChange(temp->pinId[2], 2, dpstData, V_OPEN);
+			temp->volt[0] = VoltChange(temp->pinId[0], 0, dpstData, V_OPEN);
+		}
+		else
+		{
+			temp->volt[0] = VoltChange(temp->pinId[0], 0, dpstData, v1);
+			temp->volt[2] = VoltChange(temp->pinId[2], 2, dpstData, v3);
+			temp->volt[3] = VoltChange(temp->pinId[3], 3, dpstData, V_OPEN);
+			temp->volt[1] = VoltChange(temp->pinId[1], 1, dpstData, V_OPEN);
+		}*/
+		if ((v0 != GND && v1 != GND) && (v2 != GND && v3 != GND)) {
+			if ((v0 != V_OPEN && v1 != V_OPEN) && (v2 != V_OPEN && v3 != V_OPEN)) {
+				if ((v0 > v1) && (v2 > v3))
+				{
+					temp->volt[1] = VoltChange(temp->pinId[1], 1, ComponentAddress, v0);
+					temp->volt[3] = VoltChange(temp->pinId[3], 3, ComponentAddress, v2);
+				}
+				else
+				{
+					temp->volt[0] = VoltChange(temp->pinId[0], 0, ComponentAddress, v1);
+					temp->volt[2] = VoltChange(temp->pinId[2], 2, ComponentAddress, v3);
+				}
+			}
+			else if (v1 == V_OPEN && v3 == V_OPEN) {
+				temp->volt[1] = VoltChange(temp->pinId[1], 1, ComponentAddress, v0);
+				temp->volt[3] = VoltChange(temp->pinId[3], 3, ComponentAddress, v2);
+			}
+			else if (v0 == V_OPEN && v2 == V_OPEN) {
+				temp->volt[0] = VoltChange(temp->pinId[0], 0, ComponentAddress, v1);
+				temp->volt[2] = VoltChange(temp->pinId[2], 2, ComponentAddress, v3);
+			}
+		}
+		else {
+			temp->volt[0] = VoltChange(temp->pinId[0], 0, ComponentAddress, GND);
+			temp->volt[1] = VoltChange(temp->pinId[1], 1, ComponentAddress, GND);
+			temp->volt[2] = VoltChange(temp->pinId[2], 2, ComponentAddress, GND);
+			temp->volt[3] = VoltChange(temp->pinId[3], 3, ComponentAddress, GND);
+		}
+	}
+}
+
 void HandleDPSTEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
 	void* ImageLocation, UINT ImageId, HWND* h)
 {
 	DPSTStruct *temp = (DPSTStruct*)ComponentAddress;
-
 	if (SimulationStarted)
 	{
 		switch (Event) {
-		case EVENT_MOUSE_UP:
-			/*if (temp->Latched)
+		case EVENT_MOUSE_CLICK:
+			if (temp->latched)
 			{
-				temp->Open = !temp->Open;
-				/*MessageBox(NULL,
-				"Latched", "Test", MB_OK | MB_ICONWARNING);
-			}*/
-			/*else
-			{
-				temp->Open = temp->NOpen;
-				// MessageBox(NULL,
-				// "Latched", "Test", MB_OK | MB_ICONWARNING);
-			}*/
-			/*SwitchStateChanged(temp, ImageLocation);
-			UpdateValues(temp, ComponentAddress);
-			break;*/
-		case EVENT_MOUSE_DOWN:
-			/*if (!temp->Latched)
-			{
-				temp->Open = !temp->NOpen;
-				SwitchStateChanged(temp, ImageLocation);
-				UpdateValues(temp, ComponentAddress);
+				temp->open = !temp->open;
 			}
-			*/
+			else
+			{
+				temp->open = temp->init_pos;
+			}
+			// Setting the image according to the click.
+			SetImage(!temp->open ? DPST_switch_disconnected_1 : DPST_switch_connected_1,
+				ImageLocation);
+			RefreshImages();
+			DPSTUpdateValues(temp, ComponentAddress);
 			break;
 		}
-
 	}
 	else
 	{
@@ -198,40 +258,62 @@ void HandleDPSTEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
 	}
 }
 
+// Voltage change at each pin
 double DPSTVoltChanged(void* dpstData, BOOL SimulationStarted, int Index,
 	double Volt, int Source, void* ImageLocation)
 {
 	DPSTStruct* temp = (DPSTStruct*)dpstData;
 	if (SimulationStarted)
 	{
+		// Fetching the voltages at each pin.
 		double v0,v1,v2,v3;
 		v0 = VoltRequest(temp->pinId[0], dpstData);
 		v1 = VoltRequest(temp->pinId[1], dpstData);
 		v2 = VoltRequest(temp->pinId[2], dpstData);
 		v3 = VoltRequest(temp->pinId[3], dpstData);
-		if (temp->open)
+		if (temp->open)				// Open condition.
 		{
 			temp->volt[0] = VoltChange(temp->pinId[0], 0, dpstData, V_OPEN);
 			temp->volt[1] = VoltChange(temp->pinId[1], 1, dpstData, V_OPEN);
 			temp->volt[2] = VoltChange(temp->pinId[2], 2, dpstData, V_OPEN);
 			temp->volt[3] = VoltChange(temp->pinId[3], 3, dpstData, V_OPEN);
-			/*sprintf_s(Debug, "SwitchVoltChanged: \tAddress: %p \tVolt0:%f \t Volt1:%f\n",
-			SwitchData, Voltage, Volt);
-			OutputDebugString(Debug);*/
 			return temp->volt[Index];
 		}
-		if ((v0 > v1) && (v2 > v3))
-		{
-			temp->volt[1] = VoltChange(temp->pinId[1], 1, dpstData, v0);
-			temp->volt[3] = VoltChange(temp->pinId[3], 3, dpstData, v2);
-			return temp->volt[Index];
-		}
-		else
-		{
-			// temp->Volt[!Index] = VoltChange(temp->PinId[!Index], !Index, SwitchData, Volt);
-			temp->volt[0] = VoltChange(temp->pinId[0], 0, dpstData, v1);
-			temp->volt[2] = VoltChange(temp->pinId[2], 2, dpstData, v3);			
-			return temp->volt[Index];
+		// Closed condition
+		else if (!temp->open) {
+			if ((v0 != GND && v1 != GND) && (v2 != GND && v3 != GND)) {
+				if ((v0 != V_OPEN && v1 != V_OPEN) && (v2 != V_OPEN && v3 != V_OPEN)) {
+					if ((v0 > v1) && (v2 > v3))
+					{
+						temp->volt[1] = VoltChange(temp->pinId[1], 1, dpstData, v0);
+						temp->volt[3] = VoltChange(temp->pinId[3], 3, dpstData, v2);
+						return temp->volt[Index];
+					}
+					else
+					{
+						temp->volt[0] = VoltChange(temp->pinId[0], 0, dpstData, v1);
+						temp->volt[2] = VoltChange(temp->pinId[2], 2, dpstData, v3);
+						return temp->volt[Index];
+					}
+				}
+				else if (v1 == V_OPEN && v3 == V_OPEN) {
+					temp->volt[1] = VoltChange(temp->pinId[1], 1, dpstData, v0);
+					temp->volt[3] = VoltChange(temp->pinId[3], 3, dpstData, v2);
+					return (temp->volt[Index]);
+				}
+				else if (v0 == V_OPEN && v2 == V_OPEN) {
+					temp->volt[0] = VoltChange(temp->pinId[0], 0, dpstData, v1);
+					temp->volt[2] = VoltChange(temp->pinId[2], 2, dpstData, v3);
+					return (temp->volt[Index]);
+				}
+			}
+			else {
+				temp->volt[0] = VoltChange(temp->pinId[0], 0, dpstData, GND);
+				temp->volt[1] = VoltChange(temp->pinId[1], 1, dpstData, GND);
+				temp->volt[2] = VoltChange(temp->pinId[2], 2, dpstData, GND);
+				temp->volt[3] = VoltChange(temp->pinId[3], 3, dpstData, GND);
+				return (temp->volt[Index]);
+			}
 		}
 	}
 	else
@@ -242,6 +324,7 @@ double DPSTVoltChanged(void* dpstData, BOOL SimulationStarted, int Index,
 	return 0;
 }
 
+// Setting the pin Ids of each pin.
 void SetDPSTIds(int* id, void* ComponentAddress)
 {
 	DPSTStruct *s = (DPSTStruct*)ComponentAddress;
