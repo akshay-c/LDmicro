@@ -49,6 +49,16 @@ size_t GetStructSize(int ComponentId)
         case COMPONENT_RELAY:
             return sizeof(RelayStruct);
         break;
+        case COMPONENT_SPDT:
+            return sizeof(SpdtStruct);
+        break;
+        case COMPONENT_DPST:
+            return sizeof(DpstStruct);
+        break;
+        case COMPONENT_DPDT:
+            return sizeof(DpdtStruct);
+        break;
+
     }
     return (size_t)-1;
 }
@@ -64,6 +74,16 @@ int InitializeComponentProperties(void *ComponentAddress, int ComponentId)
         case COMPONENT_RELAY:
             return InitRelay(ComponentAddress);
         break;
+	  case COMPONENT_SPDT:
+            return InitSpdt(ComponentAddress);
+        break;
+	  case COMPONENT_DPST:
+            return InitDpst(ComponentAddress);
+        break;
+	  case COMPONENT_DPDT:
+            return InitDpdt(ComponentAddress);
+        break;
+
     }
     return 0;
 }
@@ -81,6 +101,13 @@ double VoltSet(void* ComponentAddress, BOOL SimulationStarted, int ImageType, in
         break;
         case COMPONENT_RELAY:
             return RelayVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
+    	case COMPONENT_SPDT:
+            return SpdtVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
+    	case COMPONENT_DPST:
+            return DpstVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
+    	case COMPONENT_DPDT:
+            return DpdtVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
+    
     }
     return Volt;
 }
@@ -97,7 +124,18 @@ void  	SetPinIds(int Index, void *PinName,int ComponentId, void *ComponentAddres
             break;
             case COMPONENT_RELAY:
                 SetRelayIds(PinIds,ComponentAddress);
-        }
+			break;
+       		case  COMPONENT_SPDT:
+                SetSpdtIds(PinIds, ComponentAddress);
+            break;
+       		case  COMPONENT_DPST:
+                SetDpstIds(PinIds, ComponentAddress);
+            break;
+       		case  COMPONENT_DPDT:
+                SetDpdtIds(PinIds, ComponentAddress);
+            break;
+
+	  }
     }
 }
 
@@ -125,6 +163,19 @@ int NotifyComponent(void *ComponentAddress, void *PinName, int ComponentId,
             HandleRelayEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
             // return InitRelay(ComponentAddress);
         break;
+        case COMPONENT_SPDT:
+            HandleSpdtEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
+            // return InitRelay(ComponentAddress);
+        break;
+        case COMPONENT_DPST:
+            HandleDpstEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
+            // return InitRelay(ComponentAddress);
+        break;
+        case COMPONENT_DPDT:
+            HandleDpdtEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
+            // return InitRelay(ComponentAddress);
+        break;
+
     }
     // return voltage
     return 0;

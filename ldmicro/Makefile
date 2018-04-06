@@ -44,7 +44,11 @@ LDOBJS   = $(OBJDIR)\ldmicro.obj \
 
 COMPOBJS  = $(OBJDIR)\components.obj \
 			$(OBJDIR)\switch.obj \
-			$(OBJDIR)\relay.obj
+			$(OBJDIR)\relay.obj	\
+			$(OBJDIR)\spdt.obj	\
+			$(OBJDIR)\dpst.obj	\
+			$(OBJDIR)\dpdt.obj	\
+
 
 
 HELPOBJ  = $(OBJDIR)\helptext.obj

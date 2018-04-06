@@ -29,4 +29,38 @@ typedef struct RelayStructTag
 
 }RelayStruct;
 
+typedef struct SpdtStructTag
+{
+    int     id;
+    int     Image;                     
+    BOOL    Circuit;               //Circuit Position 0 or 1
+    char    Name[15];
+    double  Volt[3];
+    int     PinId[3];
+
+}SpdtStruct;
+
+typedef struct DpstStructTag
+{
+    int     id;
+    int     Image;                     
+    BOOL    Open;               //Switch Position open or closed
+    char    Name[15];
+    double  Volt[4];
+    int     PinId[4];
+
+}DpstStruct;
+
+typedef struct DpdtStructTag
+{
+    int     id;
+    int     Image;                     
+    BOOL    Circuit;               //Circuit1 Position 0 or 1
+    char    Name[15];
+    double  Volt[6];
+    int     PinId[6];
+
+}DpdtStruct;
+
+
 #endif
