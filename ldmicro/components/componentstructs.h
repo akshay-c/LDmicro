@@ -40,4 +40,15 @@ typedef struct SpdtStructTag
 
 }SpdtStruct;
 
+typedef struct DpstStructTag
+{
+    int     id;
+    int     Image;                     
+    BOOL    Open;               //Circuit Position 0 or 1
+    char    Name[15];
+    double  Volt[4];
+    int     PinId[4];
+
+}DpstStruct;
+
 #endif

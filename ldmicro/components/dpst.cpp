@@ -10,107 +10,107 @@
 #include "components.h"
 
 static HWND TemporaryRadio;
-static HWND Circuit1Radio;
-static HWND Circuit2Radio;
+static HWND OpenRadio;
+static HWND ClosedRadio;
 static HWND NameTextbox;
-HWND* SpdtDialog;
+HWND* DpstDialog;
 
 
-void SpdtStateChanged(SpdtStruct* SpdtData, void* ImageLocation);
-void MakeSpdtControls()
+void DpstStateChanged(DpstStruct* DpstData, void* ImageLocation);
+void MakeDpstControls()
 {
-    HWND ActionGrouper = CreateWindowEx(0, WC_BUTTON, ("Default Shorted Circuit"),
+    HWND ActionGrouper = CreateWindowEx(0, WC_BUTTON, ("Default State"),
         WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
-        7, 3, 120, 65, *SpdtDialog, NULL, NULL, NULL);
+        7, 3, 120, 65, *DpstDialog, NULL, NULL, NULL);
     FontNice(ActionGrouper);
 
-    Circuit1Radio = CreateWindowEx(0, WC_BUTTON, ("Circuit 1"),
+    OpenRadio = CreateWindowEx(0, WC_BUTTON, ("Open"),
         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
-        16, 21, 100, 20, *SpdtDialog, NULL, NULL, NULL);
-    FontNice(Circuit1Radio);
+        16, 21, 100, 20, *DpstDialog, NULL, NULL, NULL);
+    FontNice(OpenRadio);
 
-    Circuit2Radio = CreateWindowEx(0, WC_BUTTON, ("Circuit 2"),
+    ClosedRadio = CreateWindowEx(0, WC_BUTTON, ("Closed"),
         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-        16, 41, 100, 20, *SpdtDialog, NULL, NULL, NULL);
-    FontNice(Circuit2Radio);
+        16, 41, 100, 20, *DpstDialog, NULL, NULL, NULL);
+    FontNice(ClosedRadio);
 
     HWND textLabel = CreateWindowEx(0, WC_STATIC, ("Name:"),
         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
-        100, 80, 50, 21, *SpdtDialog, NULL, NULL, NULL);
+        100, 80, 50, 21, *DpstDialog, NULL, NULL, NULL);
     FontNice(textLabel);
 
     NameTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT,"",
         WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-        155, 80, 155, 21, *SpdtDialog, NULL, NULL, NULL);
+        155, 80, 155, 21, *DpstDialog, NULL, NULL, NULL);
     FontFixed(NameTextbox);
 
     /*PrevNameProc = SetWindowLongPtr(NameTextbox, GWLP_WNDPROC, 
         (LONG_PTR)MyNameProc);*/
 }
 
-void LoadState(SpdtStruct* Data)
+void LoadState(DpstStruct* Data)
 {
-    if(Data->Circuit)
+    if(Data->Open)
     {
-        Button_SetCheck(Circuit2Radio, BST_CHECKED);
+        Button_SetCheck(OpenRadio, BST_CHECKED);
     }else
     {
-        Button_SetCheck(Circuit1Radio, BST_CHECKED);
+        Button_SetCheck(ClosedRadio, BST_CHECKED);
     }
 }
 
 
-BOOL SaveSpdtDialog(SpdtStruct* Data)
+BOOL SaveDpstDialog(DpstStruct* Data)
 {
-    char temp[15];
-    BOOL Circuit;
-    if(Button_GetState(Circuit1Radio) == BST_CHECKED)
+    char temp[15]; 
+    BOOL Open;
+    if(Button_GetState(OpenRadio) == BST_CHECKED)
     {
-        Circuit = FALSE;
+        Open = TRUE;
             
-    }else if(Button_GetState(Circuit2Radio) == BST_CHECKED)
+    }else if(Button_GetState(ClosedRadio) == BST_CHECKED)
     {
-        Circuit = TRUE;
+        Open = FALSE;
     }else
     {
-        MessageBox(*SpdtDialog,
+        MessageBox(*DpstDialog,
             ("Incomplete"), ("Warning"), MB_OK | MB_ICONWARNING);
         return FALSE;
     }
 
     if(Edit_GetText(NameTextbox, (LPSTR)&temp, 15) < 1)
     {
-        MessageBox(*SpdtDialog,
+        MessageBox(*DpstDialog,
             ("Incomplete"), ("Warning"), MB_OK | MB_ICONWARNING);
         return FALSE;
     }else
     {
-        Data-> Circuit = Circuit;
+        Data-> Open = Open;
         strcpy(Data->Name, temp);
-        if(Circuit)
+        if(Open)
         {
-            Data->Image =SPDT_SWITCH_2;
+            Data->Image =DPST_SWITCH_2;
         }
         else
         {
-            Data->Image =SPDT_SWITCH_1;
+            Data->Image =DPST_SWITCH_1;
         }
     }
     return TRUE;
 }
 
-void ShowSpdtDialog(void* ComponentAddress)
+void ShowDpstDialog(void* ComponentAddress)
 {
-    SpdtStruct* Data = (SpdtStruct*) ComponentAddress;
+    DpstStruct* Data = (DpstStruct*) ComponentAddress;
     BOOL Canceled, Complete = TRUE;
-    SpdtDialog = CreateDialogWindow("Spdt Dialog", 100, 100, 263, 145, STYLE_VERTICAL);
-    MakeSpdtControls();
+    DpstDialog = CreateDialogWindow("Dpst Dialog", 100, 100, 263, 145, STYLE_VERTICAL);
+    MakeDpstControls();
     ShowDialogWindow();
     LoadState(Data);
     Canceled = ProcessDialogWindow();
     while(Canceled == FALSE)
     {
-        Complete = SaveSpdtDialog(Data);
+        Complete = SaveDpstDialog(Data);
         if(Complete == TRUE)
         {
             // MessageBox(*SwitchDialog,
@@ -122,40 +122,54 @@ void ShowSpdtDialog(void* ComponentAddress)
             Canceled = ProcessDialogWindow();
         }
     }
-    DestroyWindow(*SpdtDialog);
+    DestroyWindow(*DpstDialog);
 }
 
 
-int InitSpdt(void* ComponentAddress)
+int InitDpst(void* ComponentAddress)
 {
-    SpdtStruct* temp = (SpdtStruct*)ComponentAddress;
-    temp->Image = SPDT_SWITCH_1;
-    temp->Circuit = FALSE;
+    DpstStruct* temp = (DpstStruct*)ComponentAddress;
+    temp->Image = DPST_SWITCH_2;
+    temp->Open = TRUE;
     temp->Volt[0] = V_OPEN;
     temp->Volt[1] = V_OPEN;
     temp->Volt[2] = V_OPEN;
-
-    return SPDT_SWITCH_1;
+    temp->Volt[3] = V_OPEN;
+    return DPST_SWITCH_2;
 }
 
 
-double UpdateValues(void* ComponentAddress, int i=0)
+double UpdateValuesDpst(void* ComponentAddress, int i=0)
 {
     /*char Debug[256];
     sprintf_s(Debug, "Clicked: %p\n", ComponentAddress);
     OutputDebugString(Debug);*/
-	SpdtStruct* Switch = (SpdtStruct*)ComponentAddress;
+	DpstStruct* Switch = (DpstStruct*)ComponentAddress;
 
-    if(Switch->Circuit)
+    if(Switch->Open)
         {
+            Switch->Volt[0] =
+                VoltChange(Switch->PinId[0], 0, ComponentAddress, V_OPEN); 
             Switch->Volt[1] =
                 VoltChange(Switch->PinId[1], 1, ComponentAddress, V_OPEN);
+            Switch->Volt[2] =
+                VoltChange(Switch->PinId[2], 2, ComponentAddress, V_OPEN); 
+            Switch->Volt[3] =
+                VoltChange(Switch->PinId[3], 3, ComponentAddress, V_OPEN);
+        }
+
+    else
+    	{
 
             double Voltage;
-            Voltage = VoltRequest(Switch->PinId[0], ComponentAddress);
+            Voltage = VoltRequest(Switch->PinId[0], Switch);
             Switch->Volt[0] = Voltage;
-            Voltage = VoltRequest(Switch->PinId[2], ComponentAddress);
+            Voltage = VoltRequest(Switch->PinId[1], Switch);
+            Switch->Volt[1] = Voltage;
+            Voltage = VoltRequest(Switch->PinId[2], Switch);
             Switch->Volt[2] = Voltage;
+            Voltage = VoltRequest(Switch->PinId[3], Switch);
+            Switch->Volt[3] = Voltage;
 
 
             if(Switch->Volt[0]==GND || Switch->Volt[2]==GND)
@@ -165,52 +179,40 @@ double UpdateValues(void* ComponentAddress, int i=0)
             }
             else
             {
-            	double tempvolt=max(VoltRequest(Switch->PinId[0], ComponentAddress),VoltRequest(Switch->PinId[2], ComponentAddress));
-            	Switch->Volt[2]=VoltChange(Switch->PinId[2],2,ComponentAddress,tempvolt);
-            	Switch->Volt[0]=VoltChange(Switch->PinId[0],0,ComponentAddress,tempvolt);
+            double tempvolt=max(VoltRequest(Switch->PinId[0], ComponentAddress),VoltRequest(Switch->PinId[2], ComponentAddress));
+                Switch->Volt[2]=VoltChange(Switch->PinId[2],2,ComponentAddress,tempvolt);
+                Switch->Volt[0]=VoltChange(Switch->PinId[0],0,ComponentAddress,tempvolt);
             }
-        }
 
-    else
-    	{
-    		Switch->Volt[2] =
-                VoltChange(Switch->PinId[2], 2, Switch, V_OPEN);
-
-            double Voltage;
-            Voltage = VoltRequest(Switch->PinId[0], Switch);
-            Switch->Volt[0] = Voltage;
-            Voltage = VoltRequest(Switch->PinId[1], Switch);
-            Switch->Volt[1] = Voltage;
-
-
-            if(Switch->Volt[0]==GND || Switch->Volt[1]==GND)
+            if(Switch->Volt[1]==GND || Switch->Volt[3]==GND)
             {
-            	Switch->Volt[1]=VoltChange(Switch->PinId[1], 1, ComponentAddress, GND);
-            	Switch->Volt[0]=VoltChange(Switch->PinId[0],0,ComponentAddress,GND);
+                Switch->Volt[1]=VoltChange(Switch->PinId[1], 1, ComponentAddress, GND);
+                Switch->Volt[3]=VoltChange(Switch->PinId[3],3,ComponentAddress,GND);
             }
+         
             else
             {
-            double tempvolt=max(VoltRequest(Switch->PinId[0], ComponentAddress),VoltRequest(Switch->PinId[1], ComponentAddress));
+            double tempvolt=max(VoltRequest(Switch->PinId[3], ComponentAddress),VoltRequest(Switch->PinId[1], ComponentAddress));
             	Switch->Volt[1]=VoltChange(Switch->PinId[1],1,ComponentAddress,tempvolt);
-            	Switch->Volt[0]=VoltChange(Switch->PinId[0],0,ComponentAddress,tempvolt);
+            	Switch->Volt[3]=VoltChange(Switch->PinId[3],3,ComponentAddress,tempvolt);
             }
 	    }    	
  return Switch->Volt[i];
 }
 
 
-void HandleSpdtEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
+void HandleDpstEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
     void* ImageLocation, UINT ImageId, HWND* h)
 {
-    SpdtStruct* temp = (SpdtStruct*)ComponentAddress;
+    DpstStruct* temp = (DpstStruct*)ComponentAddress;
 
     if(SimulationStarted)
     {
         switch(Event)
         {
             case EVENT_MOUSE_CLICK:
-            	SpdtStateChanged(temp,ImageLocation);
-            	UpdateValues(ComponentAddress);
+            	DpstStateChanged(temp,ImageLocation);
+            	UpdateValuesDpst(ComponentAddress);
             	break;
          	default:
          		break;
@@ -221,7 +223,7 @@ void HandleSpdtEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
     {
         switch(Event){
             case EVENT_MOUSE_DBLCLICK:
-            	ShowSpdtDialog(ComponentAddress);
+            	ShowDpstDialog(ComponentAddress);
                 SetImage(temp->Image, ImageLocation);
                 RefreshImages();
             	break;
@@ -231,31 +233,32 @@ void HandleSpdtEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
     }
 }
 
-void SpdtStateChanged(SpdtStruct* SpdtData, void* ImageLocation)
+void DpstStateChanged(DpstStruct* DpstData, void* ImageLocation)
 {
-    SetImage(SpdtData->Circuit ? SPDT_SWITCH_2 : SPDT_SWITCH_1,
+    SetImage(DpstData->Open ? DPST_SWITCH_2 : DPST_SWITCH_1,
             ImageLocation);
         RefreshImages();
 }
 
-double SpdtVoltChanged(void* SpdtData, BOOL SimulationStarted, int Index,
+double DpstVoltChanged(void* DpstData, BOOL SimulationStarted, int Index,
     double Volt, int Source, void* ImageLocation)
 {
 
     // char Debug[256];
-    SpdtStruct* temp = (SpdtStruct*)SpdtData;
+    DpstStruct* temp = (DpstStruct*)DpstData;
     if(SimulationStarted)
-    	return UpdateValues(SpdtData,Index);
+    	return UpdateValuesDpst(DpstData,Index);
     return Volt;
 }
 
 
-void SetSpdtIds(int* id,void* ComponentAddress)
+void SetDpstIds(int* id,void* ComponentAddress)
 {
-    SpdtStruct* s = (SpdtStruct*)ComponentAddress;
+    DpstStruct* s = (DpstStruct*)ComponentAddress;
     s->PinId[0] = *id++;
     s->PinId[1] = *id++;
     s->PinId[2] = *id++;
+    s->PinId[3] = *id++;
     /*char Debug[256];
     sprintf_s(Debug, "SetSwitchIds: \tAddr1: %p \tAddr2: %p \tPin0:%d \t Pin1:%d \tVolt0: %f Volt1: %f\n",
         ComponentAddress, s, s->PinId[0], s->PinId[1],VoltRequest(s->PinId[0], ComponentAddress),
