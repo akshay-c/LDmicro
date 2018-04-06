@@ -55,6 +55,9 @@ size_t GetStructSize(int ComponentId)
         case COMPONENT_DPST:
             return sizeof(DpstStruct);
         break;
+        case COMPONENT_DPDT:
+            return sizeof(DpdtStruct);
+        break;
 
     }
     return (size_t)-1;
@@ -76,6 +79,9 @@ int InitializeComponentProperties(void *ComponentAddress, int ComponentId)
         break;
 	  case COMPONENT_DPST:
             return InitDpst(ComponentAddress);
+        break;
+	  case COMPONENT_DPDT:
+            return InitDpdt(ComponentAddress);
         break;
 
     }
@@ -99,6 +105,8 @@ double VoltSet(void* ComponentAddress, BOOL SimulationStarted, int ImageType, in
             return SpdtVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
     	case COMPONENT_DPST:
             return DpstVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
+    	case COMPONENT_DPDT:
+            return DpdtVoltChanged(ComponentAddress, SimulationStarted, Index, Volt, Source, ImageLocation);
     
     }
     return Volt;
@@ -122,6 +130,9 @@ void  	SetPinIds(int Index, void *PinName,int ComponentId, void *ComponentAddres
             break;
        		case  COMPONENT_DPST:
                 SetDpstIds(PinIds, ComponentAddress);
+            break;
+       		case  COMPONENT_DPDT:
+                SetDpdtIds(PinIds, ComponentAddress);
             break;
 
 	  }
@@ -158,6 +169,10 @@ int NotifyComponent(void *ComponentAddress, void *PinName, int ComponentId,
         break;
         case COMPONENT_DPST:
             HandleDpstEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
+            // return InitRelay(ComponentAddress);
+        break;
+        case COMPONENT_DPDT:
+            HandleDpdtEvent(ComponentAddress, Event, SimulationStarted, ImageLocation, ImageId, h);
             // return InitRelay(ComponentAddress);
         break;
 

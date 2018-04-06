@@ -25,6 +25,7 @@ int InitSwitch(void* ComponentAddress);
 int InitRelay(void* ComponentAddress);
 int InitSpdt(void* ComponentAddress);
 int InitDpst(void* ComponentAddress);
+int InitDpdt(void* ComponentAddress);
 
 
 /*Event Handlers*/
@@ -35,6 +36,8 @@ void HandleRelayEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
 void HandleSpdtEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
     void* ImageLocation, UINT ImageId, HWND* h);
 void HandleDpstEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
+    void* ImageLocation, UINT ImageId, HWND* h);
+void HandleDpdtEvent(void* ComponentAddress, int Event, BOOL SimulationStarted,
     void* ImageLocation, UINT ImageId, HWND* h);
 
 
@@ -47,6 +50,8 @@ double SpdtVoltChanged(void* ComponentAddress, BOOL SimulationStarted, int index
     double Volt, int Source, void* ImageLocation);
 double DpstVoltChanged(void* ComponentAddress, BOOL SimulationStarted, int index,
     double Volt, int Source, void* ImageLocation);
+double DpdtVoltChanged(void* ComponentAddress, BOOL SimulationStarted, int index,
+    double Volt, int Source, void* ImageLocation);
 
 
 
@@ -55,6 +60,7 @@ void SetSwitchIds(int*, void*);
 void SetRelayIds(int*, void*);
 void SetSpdtIds(int*, void*);
 void SetDpstIds(int*, void*);
+void SetDpdtIds(int*, void*);
 // Relay Functions
 
 #endif
