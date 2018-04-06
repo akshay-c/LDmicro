@@ -47,6 +47,7 @@ COMPOBJS  = $(OBJDIR)\components.obj \
 			$(OBJDIR)\relay.obj	\
 			$(OBJDIR)\spdt.obj	\
 			$(OBJDIR)\dpst.obj	\
+			$(OBJDIR)\dpdt.obj	\
 
 
 
